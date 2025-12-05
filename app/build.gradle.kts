@@ -8,6 +8,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
 }
 
+val isReleaseBuildInvocation: Boolean = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
+
 val appVersionName: String by project
 val appVersionCode: String by project
 
@@ -35,7 +37,30 @@ android {
         }
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("play") {
+            dimension = "distribution"
+            if (!isReleaseBuildInvocation) {
+                applicationIdSuffix = ".play"
+                versionNameSuffix = "-play-debug"
+            }
+        }
+
+        create("foss") {
+            dimension = "distribution"
+            if (!isReleaseBuildInvocation) {
+                applicationIdSuffix = ".foss"
+                versionNameSuffix = "-foss-debug"
+            }
+        }
+    }
+
     buildTypes {
+        getByName("debug") {
+            isDebuggable = true
+        }
+
         getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
@@ -66,9 +91,19 @@ android {
 }
 
 licenseReport {
-    copyCsvReportToAssets = false
+    generateCsvReport = false
+    generateHtmlReport = true
+    generateJsonReport = false
+    generateTextReport = false
+
     copyHtmlReportToAssets = true
-    copyJsonReportToAssets = false
+
+    useVariantSpecificAssetDirs = true
+}
+
+fun DependencyHandler.playImplementation(dependencyNotation: Any) {
+    add("playImplementation", dependencyNotation)
+    add("fossImplementation", dependencyNotation)
 }
 
 dependencies {
