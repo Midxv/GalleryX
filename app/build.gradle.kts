@@ -102,7 +102,10 @@ licenseReport {
 }
 
 fun DependencyHandler.playImplementation(dependencyNotation: Any) {
-    add("playImplementation", dependencyNotation)
+    add("fossImplementation", dependencyNotation)
+}
+
+fun DependencyHandler.fossImplementation(dependencyNotation: Any) {
     add("fossImplementation", dependencyNotation)
 }
 
