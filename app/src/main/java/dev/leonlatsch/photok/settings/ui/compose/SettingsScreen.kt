@@ -400,6 +400,7 @@ fun <T : SettingsEnum> PreferenceEnumView(
 
                             Text(
                                 text = stringResource(v.label),
+                                style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f)
                             )
                         }
