@@ -61,7 +61,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -367,7 +370,15 @@ private fun GalleryPhotoTile(
             Icon(
                 painter = painterResource(R.drawable.ic_videocam),
                 contentDescription = null,
-                tint = Color.LightGray,
+                tint = Color.White,
+                modifier = Modifier
+                    .dropShadow(
+                        shape = RoundedCornerShape(12.dp),
+                        shadow = Shadow(
+                            radius = 6.dp,
+                            alpha = 0.3f
+                        )
+                    )
             )
         }
 
