@@ -61,7 +61,9 @@ fun RenameAlbumDialog(
         }
 
         Dialog(onDismissRequest = onDismiss) {
-            Card {
+            Card(
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -91,7 +93,7 @@ fun RenameAlbumDialog(
                         Button(
                             onClick = {
                                 onDismiss()
-                                onRename(albumName)
+                                onRename(albumName.trim())
                             },
                             enabled = albumName.isNotEmpty()
                         ) {

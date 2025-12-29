@@ -82,6 +82,7 @@ private fun CreateAlbumDialogContent(
 
     Card(
         modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -111,7 +112,7 @@ private fun CreateAlbumDialogContent(
                 }
                 Button(
                     onClick = {
-                        onCreatePressed(albumName)
+                        onCreatePressed(albumName.trim())
                         onDismissRequest()
                     },
                     enabled = albumName.isNotEmpty()

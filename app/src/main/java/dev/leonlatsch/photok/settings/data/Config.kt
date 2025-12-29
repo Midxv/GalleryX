@@ -18,7 +18,17 @@ package dev.leonlatsch.photok.settings.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import dev.leonlatsch.photok.BuildConfig
+import dev.leonlatsch.photok.settings.domain.models.StartPage
+import dev.leonlatsch.photok.settings.domain.models.SystemDesignEnum
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+
 
 /**
  * Manages reading and writing with the config file.
@@ -28,7 +38,25 @@ import dev.leonlatsch.photok.BuildConfig
  */
 class Config(context: Context) {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     private val preferences: SharedPreferences = context.getSharedPreferences(FILE_NAME, MODE)
+
+    val values: Map<String, *>
+        get() = preferences.all
+
+    val valuesFlow: Flow<Map<String, *>> = callbackFlow {
+        send(preferences.all)
+
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, _ ->
+            coroutineScope.launch { send(sharedPreferences.all) }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+
+        awaitClose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
 
     /**
      * Determines if the app has started before.
@@ -48,9 +76,9 @@ class Config(context: Context) {
     /*
      * Sets the app design to "light", "dark" or "system"
      */
-    var systemDesign: String?
-        get() = getString(SYSTEM_DESIGN, SYSTEM_DESIGN_DEFAULT)
-        set(value) = putString(SYSTEM_DESIGN, value!!)
+    var systemDesign: SystemDesignEnum
+        get() = SystemDesignEnum.fromValue(getString(SYSTEM_DESIGN, SYSTEM_DESIGN_DEFAULT.value))
+        set(value) = putString(SYSTEM_DESIGN, value.value)
 
     /**
      * Determines if the full screen photo view, should hide the system ui at start.
@@ -63,8 +91,8 @@ class Config(context: Context) {
      * Determines the start page of the gallery.
      */
     var galleryStartPage: StartPage
-        get() = StartPage.fromValue(getString("gallery^startPage", StartPage.AllFiles.value))
-        set(value) = putString("gallery^startPage", value.value)
+        get() = StartPage.fromValue(getString(GALLERY_START_PAGE, GALLERY_START_PAGE_DEFAULT.value))
+        set(value) = putString(GALLERY_START_PAGE, value.value)
 
     /**
      * Determines if screenshots should be allowed.
@@ -121,50 +149,52 @@ class Config(context: Context) {
         set(value) = putString("user^salt", value)
 
     var biometricAuthenticationEnabled: Boolean
-        get() = getBoolean(SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED, false)
+        get() = getBoolean(SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED, SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED_DEFAULT)
         set(value) = putBoolean(SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED, value)
 
     // region put/get methods
 
-    private fun getString(key: String, default: String?) = preferences.getString(key, default)
+    fun getString(key: String, default: String?) = preferences.getString(key, default)
 
-    private fun getInt(key: String, default: Int) = preferences.getInt(key, default)
+    fun getInt(key: String, default: Int) = preferences.getInt(key, default)
 
-    private fun getIntFromString(key: String, default: Int): Int {
+    fun getIntFromString(key: String, default: Int): Int {
         val stringValue = preferences.getString(key, default.toString())
         return stringValue?.toInt() ?: default
     }
 
-    private fun getLong(key: String, default: Long): Long = preferences.getLong(key, default)
+    fun getLong(key: String, default: Long): Long = preferences.getLong(key, default)
 
-    private fun getBoolean(key: String, default: Boolean) = preferences.getBoolean(key, default)
+    fun getBoolean(key: String, default: Boolean) = preferences.getBoolean(key, default)
 
-    private fun putString(key: String, value: String?) {
-        val edit = preferences.edit()
-        edit.putString(key, value)
-        edit.apply()
+    fun putString(key: String, value: String?) {
+        preferences.edit {
+            putString(key, value)
+        }
     }
 
-    private fun putInt(key: String, value: Int) {
-        val edit = preferences.edit()
-        edit.putInt(key, value)
-        edit.apply()
+    fun putInt(key: String, value: Int) {
+        preferences.edit {
+            putInt(key, value)
+        }
     }
 
-    private fun putBoolean(key: String, value: Boolean) {
-        val edit = preferences.edit()
-        edit.putBoolean(key, value)
-        edit.apply()
+    fun putBoolean(key: String, value: Boolean) {
+        preferences.edit {
+            putBoolean(key, value)
+        }
     }
 
-    private fun putLong(key: String, value: Long) {
-        val edit = preferences.edit()
-        edit.putLong(key, value)
-        edit.apply()
+    fun putLong(key: String, value: Long) {
+        preferences.edit {
+            putLong(key, value)
+        }
     }
+
 
     // endregion
 
+    // Single source of truth for config keys and defaults. Always use these constants
     companion object {
         /**
          * The filename used to store the preferences.
@@ -183,10 +213,13 @@ class Config(context: Context) {
         const val SYSTEM_LAST_FEATURE_VERSION_CODE_DEFAULT = 0
 
         const val SYSTEM_DESIGN = "system^design"
-        const val SYSTEM_DESIGN_DEFAULT = "system"
+        val SYSTEM_DESIGN_DEFAULT = SystemDesignEnum.System
 
         const val GALLERY_AUTO_FULLSCREEN = "gallery^fullscreen.auto"
         const val GALLERY_AUTO_FULLSCREEN_DEFAULT = true
+
+        const val GALLERY_START_PAGE = "gallery^startPage"
+        val GALLERY_START_PAGE_DEFAULT = StartPage.AllFiles
 
         const val SECURITY_ALLOW_SCREENSHOTS = "security^allowScreenshots"
         const val SECURITY_ALLOW_SCREENSHOTS_DEFAULT = false
@@ -210,5 +243,6 @@ class Config(context: Context) {
         const val TIMESTAMP_LAST_RECOVERY_START_DEFAULT = 0L
 
         const val SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED = "security^biometricAuthenticationEnabled"
+        const val SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED_DEFAULT = false
     }
 }
