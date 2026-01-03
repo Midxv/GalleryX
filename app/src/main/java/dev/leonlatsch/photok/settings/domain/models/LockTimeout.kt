@@ -14,15 +14,18 @@
  *   limitations under the License.
  */
 
-package dev.leonlatsch.photok.gallery.ui.components
+package dev.leonlatsch.photok.settings.domain.models
 
-import dev.leonlatsch.photok.model.database.entity.PhotoType
-import dev.leonlatsch.photok.model.database.entity.internalThumbnailFileName
+import dev.leonlatsch.photok.R
 
-data class PhotoTile(
-    val fileName: String,
-    val type: PhotoType,
-    val uuid: String,
-) {
-    val internalThumbnailFileName = internalThumbnailFileName(uuid)
+enum class LockTimeout(
+    override val value: String,
+    override val label: Int,
+) : SettingsEnum {
+    Immediately("0", R.string.settings_security_timeout_immediately),
+    OneMinute("60000", R.string.settings_security_timeout_one_minute),
+    TwoMinute("120000", R.string.settings_security_timeout_two_minute),
+    FiveMinute("300000", R.string.settings_security_timeout_five_minute),
+    TenMinute("600000", R.string.settings_security_timeout_ten_minute),
+    Never("-1", R.string.settings_security_timeout_never),
 }

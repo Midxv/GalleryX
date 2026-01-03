@@ -17,7 +17,7 @@
 <resources>
 
     <!-- COMMON -->
-    <string name="common_copyright_notice">版权所有 \u00A9 2020-2025 Leon Latsch</string>
+    <string name="common_copyright_notice">版权所有 \u00A9 2020-2026 Leon Latsch</string>
     <string name="common_slash">/</string>
     <string name="common_percent">%</string>
     <string name="common_pipe">|</string>
@@ -81,6 +81,7 @@
     <string name="import_menu_restore_title">恢复备份</string>
     <string name="import_menu_restore_description">恢复 Photok 备份。恢复的文件将被添加至当前文件中。</string>
     <string name="import_menu_delete_warning">导入的文件将被删除</string>
+    <string name="import_menu_album_tooltip">Files will be added to \"%s\" after importing</string> <!-- TODO -->
 
     <!-- PROCESS -->
     <string name="process_close">关闭</string>
@@ -96,6 +97,7 @@
     <string name="view_photo_detail_import_at_label">导入于:</string>
     <string name="view_photo_detail_file_type_label">文件类型:</string>
     <string name="view_photo_detail_size_label">文件大小:</string>
+    <string name="view_photo_detail_last_modified">上次修改：</string>
     <string name="view_photo_play_button_description">播放视频</string>
 
     <!-- MAIN MENU -->
@@ -263,17 +265,17 @@
     <string name="news_view_changelog">查看变更记录</string>
     <string name="news_changelog_url">https://github.com/leonlatsch/Photok/releases</string>
 
-    <string name="news_title_1">选择启动页</string>
-    <string name="news_summary_1">现在可以选择打开 Photok 时展示的页面</string>
+    <string name="news_title_1">Improved Video Player</string> <!-- TODO -->
+    <string name="news_summary_1">The video player was upgraded to newer Media3 API.</string> <!-- TODO -->
 
-    <string name="news_title_2">完善翻译</string>
-    <string name="news_summary_2">更新了中文和土耳其语翻译</string>
+    <string name="news_title_2">Better Photo Browsing and Sorting</string> <!-- TODO -->
+    <string name="news_summary_2">Image viewing performance was improved and photos can now be sorted by last modified date.</string> <!-- TODO -->
 
-    <string name="news_title_3">NOT_USED</string>
-    <string name="news_summary_3">NOT_USED</string>
+    <string name="news_title_3">Refined Settings UI</string> <!-- TODO -->
+    <string name="news_summary_3">The settings screen was redesigned to match the ongoing design overhaul.</string> <!-- TODO -->
 
-    <string name="news_title_4">NOT_USED</string>
-    <string name="news_summary_4">NOT_USED</string>
+    <string name="news_title_4">Translations and Stability Fixes</string> <!-- TODO -->
+    <string name="news_summary_4">Updated translations and multiple fixes improve overall reliability.</string> <!-- TODO -->
 
     <!-- Recovery Menu -->
     <string name="recovery_subtitle">恢复菜单</string>
@@ -333,6 +335,7 @@
     <string name="sorting_field_filename_label">文件名</string>
     <string name="sorting_field_size_label">文件大小</string>
     <string name="sorting_field_added_to_album_label">已添加到相册</string>
+    <string name="sorting_field_last_modified">上次修改</string>
 
     <string name="sorting_restore_default">恢复默认</string>
 </resources>

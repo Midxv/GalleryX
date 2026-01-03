@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package dev.leonlatsch.photok.gallery.ui.components
+package dev.leonlatsch.photok.gallery.components
 
 import android.content.res.Configuration
 import android.net.Uri
@@ -56,11 +56,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -80,6 +84,7 @@ import dev.leonlatsch.photok.ui.components.ConfirmationDialog
 import dev.leonlatsch.photok.ui.components.MagicFab
 import dev.leonlatsch.photok.ui.components.MultiSelectionMenu
 import dev.leonlatsch.photok.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 private const val PORTRAIT_COLUMN_COUNT = 3
 private const val LANDSCAPE_COLUMN_COUNT = 6
@@ -87,6 +92,7 @@ private const val LANDSCAPE_COLUMN_COUNT = 6
 @Composable
 fun PhotoGallery(
     photos: List<PhotoTile>,
+    albumName: String?,
     multiSelectionState: MultiSelectionState,
     onOpenPhoto: (PhotoTile) -> Unit,
     onExport: (Uri?) -> Unit,
@@ -96,12 +102,13 @@ fun PhotoGallery(
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.current
-    val importMenuBottomSheetVisible = remember { mutableStateOf(false) }
+    var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Hide magic fab menu when multi selection active
     LaunchedEffect(multiSelectionState.isActive.value) {
         if (multiSelectionState.isActive.value) {
-            importMenuBottomSheetVisible.value = false
+            importMenuBottomSheetVisible = false
         }
     }
 
@@ -122,14 +129,18 @@ fun PhotoGallery(
             MagicFab(
                 label = stringResource(R.string.import_menu_fab_label),
                 onClick = {
-                    importMenuBottomSheetVisible.value = true
+                    importMenuBottomSheetVisible = true
                 }
             )
         }
 
         ImportMenuBottomSheet(
-            openState = importMenuBottomSheetVisible,
+            open = importMenuBottomSheetVisible,
+            onDismissRequest = {
+                importMenuBottomSheetVisible = false
+            },
             onImportChoice = onImportChoice,
+            albumName = albumName,
         )
 
         var showDeleteConfirmationDialog by remember {
@@ -359,7 +370,15 @@ private fun GalleryPhotoTile(
             Icon(
                 painter = painterResource(R.drawable.ic_videocam),
                 contentDescription = null,
-                tint = Color.LightGray,
+                tint = Color.White,
+                modifier = Modifier
+                    .dropShadow(
+                        shape = RoundedCornerShape(12.dp),
+                        shadow = Shadow(
+                            radius = 6.dp,
+                            alpha = 0.3f
+                        )
+                    )
             )
         }
 
@@ -397,6 +416,7 @@ private fun PhotoGridPreview() {
                     PhotoTile("", PhotoType.JPEG, "5"),
                     PhotoTile("", PhotoType.MP4, "6"),
                 ),
+                albumName = null,
                 multiSelectionState = MultiSelectionState(
                     allItems = listOf("1", "2", "3"),
                 ),
@@ -425,6 +445,7 @@ private fun PhotoGridPreviewWithSelection() {
                     PhotoTile("", PhotoType.JPEG, "5"),
                     PhotoTile("", PhotoType.MP4, "6"),
                 ),
+                albumName = null,
                 multiSelectionState = MultiSelectionState(
                     allItems = listOf("1", "2", "3"),
                 ).apply {

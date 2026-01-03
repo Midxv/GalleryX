@@ -18,7 +18,7 @@
 <resources>
 
     <!-- COMMON -->
-    <string name="common_copyright_notice">Copyright \u00A9 2020-2025 Leon Latsch</string>
+    <string name="common_copyright_notice">Copyright \u00A9 2020-2026 Leon Latsch</string>
     <string name="common_slash">/</string>
     <string name="common_percent">%</string>
     <string name="common_pipe">|</string>
@@ -82,6 +82,7 @@
     <string name="import_menu_restore_title">Ein Backup wiederherstellen</string>
     <string name="import_menu_restore_description">Stelle ein Photok Backup wieder her. Die Dateien werden zu den aktuellen Dateien hinzugefügt.</string>
     <string name="import_menu_delete_warning">Importierte Dateien werden gelöscht</string>
+    <string name="import_menu_album_tooltip">Dateien werden nach dem Importieren zu \"%s\" hinzugefügt</string>
 
     <!-- PROCESS -->
     <string name="process_close">Schließen</string>
@@ -97,6 +98,7 @@
     <string name="view_photo_detail_import_at_label">Importiert am:</string>
     <string name="view_photo_detail_file_type_label">Datei Typ:</string>
     <string name="view_photo_detail_size_label">Dateigröße:</string>
+    <string name="view_photo_detail_last_modified">Zuletzt geändert:</string>
     <string name="view_photo_play_button_description">Video Abspielen</string>
 
     <!-- MAIN MENU -->
@@ -265,17 +267,17 @@
     <string name="news_view_changelog">Changelog ansehen</string>
     <string name="news_changelog_url">https://github.com/leonlatsch/Photok/releases</string>
 
-    <string name="news_title_1">Wähle deine Startseite</string>
-    <string name="news_summary_1">Wähle welche Seite angezeigt werden soll, wenn du Photok öffnest.</string>
+    <string name="news_title_1">Verbesserter Videoplayer</string>
+    <string name="news_summary_1">Der Videoplayer wurde auf die neuere Media3-API aktualisiert.</string>
 
-    <string name="news_title_2">Verbesserte Übersetzung</string>
-    <string name="news_summary_2">Türkische und Chinesische Übersetzungen wurden aktualisiert.</string>
+    <string name="news_title_2">Besseres Browsen und Sortieren von Fotos</string>
+    <string name="news_summary_2">Die Anzeige von Bildern wurde verbessert und Fotos können jetzt nach dem Änderungsdatum sortiert werden.</string>
 
-    <string name="news_title_3">NOT_USED</string>
-    <string name="news_summary_3">NOT_USED</string>
+    <string name="news_title_3">Überarbeitete Einstellungen</string>
+    <string name="news_summary_3">Die Einstellungen wurden im Rahmen der laufenden Design-Überarbeitung neu gestaltet.</string>
 
-    <string name="news_title_4">NOT_USED</string>
-    <string name="news_summary_4">NOT_USED</string>
+    <string name="news_title_4">Übersetzungen und Stabilitätsverbesserungen</string>
+    <string name="news_summary_4">Aktualisierte Übersetzungen und mehrere Fehlerbehebungen verbessern die allgemeine Zuverlässigkeit.</string>
 
     <!-- Recovery Menu -->
     <string name="recovery_subtitle">Wiederherstellungs Menu</string>
@@ -337,6 +339,7 @@
     <string name="sorting_field_filename_label">Dateiname</string>
     <string name="sorting_field_size_label">Dateigröße</string>
     <string name="sorting_field_added_to_album_label">Zum Album hinzugefügt</string>
+    <string name="sorting_field_last_modified">Zuletzt geändert</string>
 
     <string name="sorting_restore_default">Standard wiederherstellen</string>
 </resources>

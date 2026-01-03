@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package dev.leonlatsch.photok.gallery.ui.components
+package dev.leonlatsch.photok.gallery.components
 
 import android.net.Uri
 import androidx.activity.compose.LocalActivity
@@ -38,8 +38,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
+import androidx.compose.material3.TooltipDefaults.rememberTooltipPositionProvider
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
@@ -73,21 +75,24 @@ sealed interface ImportChoice {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportMenuBottomSheet(
-    openState: MutableState<Boolean>,
+    open: Boolean,
+    onDismissRequest: () -> Unit,
     onImportChoice: (ImportChoice) -> Unit,
+    albumName: String?,
     modifier: Modifier = Modifier,
 ) {
-    if (openState.value) {
+    if (open) {
         ModalBottomSheet(
             modifier = modifier,
-            onDismissRequest = { openState.value = false },
+            onDismissRequest = onDismissRequest,
             dragHandle = {
                 BottomSheetDefaults.DragHandle()
             }
         ) {
             ImportMenuDialogContent(
                 onImportChoice = onImportChoice,
-                openState = openState,
+                onDismissRequest = onDismissRequest,
+                albumName = albumName,
             )
         }
     }
@@ -95,12 +100,13 @@ fun ImportMenuBottomSheet(
 
 @Composable
 private fun ImportMenuDialogContent(
-    openState: MutableState<Boolean>,
+    onDismissRequest: () -> Unit,
     onImportChoice: (ImportChoice) -> Unit,
+    albumName: String?,
     modifier: Modifier = Modifier
 ) {
     val onImportNewItems: (List<Uri>) -> Unit = { urisToImport ->
-        openState.value = false
+        onDismissRequest()
 
         if (urisToImport.isNotEmpty()) {
             onImportChoice(
@@ -115,7 +121,7 @@ private fun ImportMenuDialogContent(
 
     val restoreBackupLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
-            openState.value = false
+            onDismissRequest()
             it ?: return@rememberLauncherForActivityResult
 
             onImportChoice(
@@ -141,6 +147,9 @@ private fun ImportMenuDialogContent(
 
                 if (showWarningChip) {
                     ImportWarningChip(modifier = modifier)
+                }
+                if (albumName != null) {
+                    AlbumNameChip(albumName, modifier = modifier)
                 }
             },
             onClick = {
@@ -174,7 +183,9 @@ fun ImportWarningChip(modifier: Modifier = Modifier) {
     val tooltipState = rememberTooltipState(isPersistent = false)
 
     TooltipBox(
-        positionProvider = rememberPlainTooltipPositionProvider(),
+        positionProvider = rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Above,
+        ),
         state = tooltipState,
         tooltip = {
             PlainTooltip(shape = RoundedCornerShape(8.dp)) {
@@ -202,6 +213,46 @@ fun ImportWarningChip(modifier: Modifier = Modifier) {
                 leadingIconContentColor = Colors.Warning,
                 labelColor = Colors.Warning,
             ),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AlbumNameChip(
+    albumName: String,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
+    val tooltipState = rememberTooltipState(isPersistent = false)
+
+    TooltipBox(
+        positionProvider = rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Above,
+        ),
+        state = tooltipState,
+        tooltip = {
+            PlainTooltip(shape = RoundedCornerShape(8.dp)) {
+                Text(text = stringResource(R.string.import_menu_album_tooltip, albumName.trim()))
+            }
+        }
+    ) {
+        AssistChip(
+            modifier = modifier,
+            onClick = { scope.launch { tooltipState.show() } },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_folder),
+                    contentDescription = null,
+                )
+            },
+            label = {
+                Text(
+                    text = albumName.trim(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
         )
     }
 }
@@ -253,7 +304,9 @@ fun ImportMenuItem(
             style = MaterialTheme.typography.bodyMedium,
         )
 
-        chips(Modifier.padding(start = DescriptionStartPadding))
+        Column {
+            chips(Modifier.padding(start = DescriptionStartPadding))
+        }
     }
 }
 
@@ -261,12 +314,27 @@ fun ImportMenuItem(
 @PreviewLightDark()
 @Composable
 private fun Preview() {
-    val openState = remember { mutableStateOf(true) }
     AppTheme {
         ModalBottomSheet(sheetState = rememberStandardBottomSheetState(), onDismissRequest = {}) {
             ImportMenuDialogContent(
-                openState = openState,
-                onImportChoice = {}
+                onDismissRequest = {},
+                onImportChoice = {},
+                albumName = null,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun PreviewAlbum() {
+    AppTheme {
+        ModalBottomSheet(sheetState = rememberStandardBottomSheetState(), onDismissRequest = {}) {
+            ImportMenuDialogContent(
+                onDismissRequest = {},
+                onImportChoice = {},
+                albumName = stringResource(R.string.gallery_albums_create_placeholder),
             )
         }
     }
@@ -276,12 +344,12 @@ private fun Preview() {
 @Preview(widthDp = 280, heightDp = 600, locale = "de")
 @Composable
 private fun SmallPreview() {
-    val openState = remember { mutableStateOf(true) }
     AppTheme {
         ModalBottomSheet(sheetState = rememberStandardBottomSheetState(), onDismissRequest = {}) {
             ImportMenuDialogContent(
-                openState = openState,
-                onImportChoice = {}
+                onDismissRequest = {},
+                onImportChoice = {},
+                albumName = null,
             )
         }
     }

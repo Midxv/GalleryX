@@ -17,7 +17,7 @@
 <resources>
 
     <!-- COMMON -->
-    <string name="common_copyright_notice">Copyright \u00A9 2020–2025 Leon Latsch</string>
+    <string name="common_copyright_notice">Copyright \u00A9 2020–2026 Leon Latsch</string>
     <string name="common_slash">/</string>
     <string name="common_percent">%</string>
     <string name="common_pipe">|</string>
@@ -81,6 +81,7 @@
     <string name="import_menu_restore_title">Restore a backup</string>
     <string name="import_menu_restore_description">Restore a Photok backup. Files will be added to your current files.</string>
     <string name="import_menu_delete_warning">Imported files will be deleted</string>
+    <string name="import_menu_album_tooltip">Files will be added to \"%s\" after importing</string>
 
     <!-- PROCESS -->
     <string name="process_close">Close</string>
@@ -96,6 +97,7 @@
     <string name="view_photo_detail_import_at_label">Imported at:</string>
     <string name="view_photo_detail_file_type_label">File Type:</string>
     <string name="view_photo_detail_size_label">File size:</string>
+    <string name="view_photo_detail_last_modified">Last modified:</string>
     <string name="view_photo_play_button_description">Play Video</string>
 
     <!-- MAIN MENU -->
@@ -263,17 +265,17 @@
     <string name="news_view_changelog">View Changelog</string>
     <string name="news_changelog_url">https://github.com/leonlatsch/Photok/releases</string>
 
-    <string name="news_title_1">Choose your start page</string>
-    <string name="news_summary_1">You can now choose what page to show when you open Photok.</string>
+    <string name="news_title_1">Improved Video Player</string>
+    <string name="news_summary_1">The video player was upgraded to newer Media3 API.</string>
 
-    <string name="news_title_2">Improved Translations</string>
-    <string name="news_summary_2">Turkish and Chinese Translations have been updated.</string>
+    <string name="news_title_2">Better Photo Browsing and Sorting</string>
+    <string name="news_summary_2">Image viewing performance was improved and photos can now be sorted by last modified date.</string>
 
-    <string name="news_title_3">NOT_USED</string>
-    <string name="news_summary_3">NOT_USED</string>
+    <string name="news_title_3">Refined Settings UI</string>
+    <string name="news_summary_3">The settings screen was redesigned to match the ongoing design overhaul.</string>
 
-    <string name="news_title_4">NOT_USED</string>
-    <string name="news_summary_4">NOT_USED</string>
+    <string name="news_title_4">Translations and Stability Fixes</string>
+    <string name="news_summary_4">Updated translations and multiple fixes improve overall reliability.</string>
 
     <!-- Recovery Menu -->
     <string name="recovery_subtitle">Recovery Menu</string>
@@ -333,6 +335,7 @@
     <string name="sorting_field_filename_label">Filename</string>
     <string name="sorting_field_size_label">File size</string>
     <string name="sorting_field_added_to_album_label">Added to album</string>
+    <string name="sorting_field_last_modified">Last modified</string>
 
     <string name="sorting_restore_default">Restore Default</string>
 </resources>

@@ -29,10 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.leonlatsch.photok.R
 import dev.leonlatsch.photok.gallery.ui.GalleryUiEvent
 import dev.leonlatsch.photok.gallery.ui.GalleryUiState
-import dev.leonlatsch.photok.gallery.ui.components.MultiSelectionState
-import dev.leonlatsch.photok.gallery.ui.components.PhotoGallery
-import dev.leonlatsch.photok.gallery.ui.components.PhotoTile
-import dev.leonlatsch.photok.gallery.ui.components.rememberMultiSelectionState
+import dev.leonlatsch.photok.gallery.components.MultiSelectionState
+import dev.leonlatsch.photok.gallery.components.PhotoGallery
+import dev.leonlatsch.photok.gallery.components.PhotoTile
+import dev.leonlatsch.photok.gallery.components.rememberMultiSelectionState
 import dev.leonlatsch.photok.model.database.entity.PhotoType
 import dev.leonlatsch.photok.sort.domain.SortConfig
 import dev.leonlatsch.photok.ui.theme.AppTheme
@@ -48,6 +48,7 @@ fun GalleryContent(
     PhotoGallery(
         modifier = modifier.fillMaxSize(),
         photos = uiState.photos,
+        albumName = null,
         multiSelectionState = multiSelectionState,
         onOpenPhoto = { handleUiEvent(GalleryUiEvent.OpenPhoto(it)) },
         onExport = { targetUri ->

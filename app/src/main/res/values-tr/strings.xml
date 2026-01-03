@@ -1,6 +1,6 @@
 <resources>
     <!-- COMMON -->
-    <string name="common_copyright_notice">Telif Hakkı \u00A9 2020–2025 Leon Latsch</string>
+    <string name="common_copyright_notice">Telif Hakkı \u00A9 2020–2026 Leon Latsch</string>
     <string name="common_slash">/</string>
     <string name="common_percent">%</string>
     <string name="common_pipe">|</string>
@@ -64,6 +64,7 @@
     <string name="import_menu_restore_title">Yedeklemeyi geri yükle</string>
     <string name="import_menu_restore_description">Photok yedeklemesini geri yükleyin. Dosyalar mevcut dosyalarınıza eklenecektir.</string>
     <string name="import_menu_delete_warning">İçe aktarılan dosyalar silinecektir</string>
+    <string name="import_menu_album_tooltip">Files will be added to \"%s\" after importing</string> <!-- TODO -->
 
     <!-- PROCESS -->
     <string name="process_close">Kapat</string>
@@ -79,6 +80,7 @@
     <string name="view_photo_detail_import_at_label">İçe Aktarma Tarihi:</string>
     <string name="view_photo_detail_file_type_label">Dosya Türü:</string>
     <string name="view_photo_detail_size_label">Dosya Boyutu:</string>
+    <string name="view_photo_detail_last_modified">Son düzenleme:</string>
     <string name="view_photo_play_button_description">Videoyu Oynat</string>
 
     <!-- MAIN MENU -->
@@ -130,7 +132,7 @@
     <string name="settings_category_gallery">Galeri</string>
     <string name="settings_gallery_auto_fullscreen_title">Otomatik Tam Ekran</string>
     <string name="settings_gallery_auto_fullscreen_summary">Bir dosya açıldığında tam ekran moduna geç</string>
-    <string name="settings_gallery_start_page_title">Start page</string> <!-- TODO -->
+    <string name="settings_gallery_start_page_title">Başlangıç Sayfası</string>
 
     <string name="settings_category_security">Güvenlik</string>
     <string name="settings_security_allow_screenshots_title">Ekran Görüntülerine İzin Ver</string>
@@ -246,17 +248,17 @@
     <string name="news_view_changelog">Değişiklik Günlüğünü Görüntüle</string>
     <string name="news_changelog_url">https://github.com/leonlatsch/Photok/releases</string>
 
-    <string name="news_title_1">Choose your start page</string> <!-- TODO -->
-    <string name="news_summary_1">You can now choose what page to show when you open Photok.</string> <!-- TODO -->
+    <string name="news_title_1">Improved Video Player</string> <!-- TODO -->
+    <string name="news_summary_1">The video player was upgraded to newer Media3 API.</string> <!-- TODO -->
 
-    <string name="news_title_2">Improved Translations</string> <!-- TODO -->
-    <string name="news_summary_2">Turkish and Chinese Translations have been updated.</string> <!-- TODO -->
+    <string name="news_title_2">Better Photo Browsing and Sorting</string> <!-- TODO -->
+    <string name="news_summary_2">Image viewing performance was improved and photos can now be sorted by last modified date.</string> <!-- TODO -->
 
-    <string name="news_title_3">NOT_USED</string>
-    <string name="news_summary_3">NOT_USED</string>
+    <string name="news_title_3">Refined Settings UI</string> <!-- TODO -->
+    <string name="news_summary_3">The settings screen was redesigned to match the ongoing design overhaul.</string> <!-- TODO -->
 
-    <string name="news_title_4">NOT_USED</string>
-    <string name="news_summary_4">NOT_USED</string>
+    <string name="news_title_4">Translations and Stability Fixes</string> <!-- TODO -->
+    <string name="news_summary_4">Updated translations and multiple fixes improve overall reliability.</string> <!-- TODO -->
 
     <!-- Recovery Menu -->
     <string name="recovery_subtitle">Kurtarma Menüsü</string>
@@ -318,6 +320,7 @@
     <string name="sorting_field_filename_label">Dosya adı</string>
     <string name="sorting_field_size_label">Dosya boyutu</string>
     <string name="sorting_field_added_to_album_label">Albüme eklendi</string>
+    <string name="sorting_field_last_modified">Son düzenleme</string>
 
     <string name="sorting_restore_default">Varsayılanı Geri Yükle</string>
 </resources>

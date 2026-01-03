@@ -27,7 +27,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
-import dev.leonlatsch.photok.gallery.ui.components.AlbumPickerViewModel
+import dev.leonlatsch.photok.gallery.components.AlbumPickerViewModel
 import dev.leonlatsch.photok.gallery.ui.compose.GalleryScreen
 import dev.leonlatsch.photok.gallery.ui.navigation.GalleryNavigator
 import dev.leonlatsch.photok.gallery.ui.navigation.PhotoActionsNavigator
@@ -37,8 +37,9 @@ import dev.leonlatsch.photok.news.newfeatures.ui.ShowNewsDialogUseCase
 import dev.leonlatsch.photok.other.extensions.finishOnBackWhileStarted
 import dev.leonlatsch.photok.other.extensions.launchLifecycleAwareJob
 import dev.leonlatsch.photok.settings.data.Config
-import dev.leonlatsch.photok.settings.data.StartPage
+import dev.leonlatsch.photok.settings.domain.models.StartPage
 import dev.leonlatsch.photok.settings.ui.compose.LocalConfig
+import dev.leonlatsch.photok.ui.LocalFragment
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -72,6 +73,7 @@ class GalleryFragment : Fragment() {
             CompositionLocalProvider(
                 LocalEncryptedImageLoader provides encryptedImageLoader,
                 LocalConfig provides config,
+                LocalFragment provides this@GalleryFragment,
             ) {
                 GalleryScreen(viewModel, albumPickerViewModel)
             }
