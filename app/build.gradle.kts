@@ -5,7 +5,7 @@ plugins {
     id("com.jaredsburrows.license")
     kotlin("android")
     kotlin("kapt")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
 }
 
 val isReleaseBuildInvocation: Boolean = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
@@ -156,10 +156,10 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.3.0")
 
     // Activity KTX for viewModels()
-    implementation("androidx.activity:activity-ktx:1.12.0")
+    implementation("androidx.activity:activity-ktx:1.12.2")
 
     // Compose
-    implementation(platform("androidx.compose:compose-bom:2025.11.01"))
+    implementation(platform("androidx.compose:compose-bom:2025.12.01"))
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.activity:activity-compose")
@@ -183,8 +183,8 @@ dependencies {
     implementation("io.coil-kt:coil-video:$coilVersion")
 
     // Exoplayer
-    implementation("androidx.media3:media3-exoplayer:1.8.0")
-    implementation("androidx.media3:media3-ui:1.8.0")
+    implementation("androidx.media3:media3-exoplayer:1.9.0")
+    implementation("androidx.media3:media3-ui:1.9.0")
 
     implementation(fileTree("libs").matching {
         include("*.jar")
@@ -192,7 +192,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.activity:activity:1.12.0")
+    implementation("androidx.activity:activity:1.12.2")
 
     // Biometric
     implementation("androidx.biometric:biometric:1.1.0")
