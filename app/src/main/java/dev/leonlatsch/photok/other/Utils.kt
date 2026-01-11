@@ -51,17 +51,18 @@ data class FileMetaData(
 fun ContentResolver.getMetadataFor(uri: Uri): FileMetaData {
     val mimeType: String? = this.getType(uri)
 
-    val projection = arrayOf(
-        MediaStore.MediaColumns.DISPLAY_NAME,
-        MediaStore.MediaColumns.SIZE,
-        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-    )
-
     var fileName: String? = null
     var size: Long? = null
     var lastModified: Long? = null
 
-    query(uri, projection, null, null, null)?.use {
+    val cursor = try {
+        query(uri, null, null, null, null)
+    } catch (e: Exception) {
+        Timber.e("Could not get metadata for $uri $e")
+        null
+    }
+
+    cursor?.use {
         try {
             val fileNameColIndex = it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
             val sizeColIndex = it.getColumnIndex(MediaStore.MediaColumns.SIZE)
@@ -72,7 +73,6 @@ fun ContentResolver.getMetadataFor(uri: Uri): FileMetaData {
             if (fileNameColIndex != -1) fileName = it.getString(fileNameColIndex)
             if (sizeColIndex != -1) size = it.getLong(sizeColIndex)
             if (dateModifiedColIndex != -1) lastModified = it.getLong(dateModifiedColIndex)
-
         } catch (e: Exception) {
             Timber.e("Could not get metadata for $uri $e")
         }
