@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.leonlatsch.photok.R
 import dev.leonlatsch.photok.ui.LocalFragment
 
@@ -33,6 +34,7 @@ import dev.leonlatsch.photok.ui.LocalFragment
  * @since 1.0.0
  * @author Leon Latsch
  */
+@AndroidEntryPoint
 class AboutFragment : Fragment() {
 
     override fun onCreateView(
