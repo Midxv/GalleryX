@@ -1,5 +1,5 @@
 /*
- *   Copyright 2020-2024 Leon Latsch
+ *   Copyright 2020–2026 Leon Latsch
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,5 +19,5 @@ package dev.leonlatsch.photok.imageloading.compose.model
 data class EncryptedImageRequestData(
     val internalFileName: String,
     val mimeType: String,
-    val playGif: Boolean = false,
+    val playAnimation: Boolean = false,
 )

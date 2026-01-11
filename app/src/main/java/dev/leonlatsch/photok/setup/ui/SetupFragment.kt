@@ -1,5 +1,5 @@
 /*
- *   Copyright 2020-2022 Leon Latsch
+ *   Copyright 2020–2026 Leon Latsch
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ class SetupFragment : BindableFragment<FragmentSetupBinding>(R.layout.fragment_s
         }
 
         activity.getBaseApplication().state.update { ApplicationState.UNLOCKED }
-        findNavController().navigate(R.id.action_setupFragment_to_galleryFragment)
+        findNavController().navigate(SetupFragmentDirections.actionSetupFragmentToGalleryFragment())
     }
 
     private fun enableOrDisableSetup() {

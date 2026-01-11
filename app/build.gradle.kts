@@ -35,6 +35,10 @@ android {
                 arguments += "room.schemaLocation" to "$projectDir/schemas"
             }
         }
+
+        base {
+            archivesName = "photok-$versionName"
+        }
     }
 
     flavorDimensions += "distribution"
