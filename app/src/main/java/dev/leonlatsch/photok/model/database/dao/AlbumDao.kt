@@ -119,7 +119,7 @@ abstract class AlbumDao {
 
     // Sorting
 
-    open fun observeAlbumWithPhotos(uuid: String, sort: Sort): Flow<AlbumWithPhotos> {
+    open fun observeAlbumWithPhotos(uuid: String, sort: Sort): Flow<AlbumWithPhotos?> {
         val query = createSortedPhotosQuery(uuid, sort)
 
         return combine(

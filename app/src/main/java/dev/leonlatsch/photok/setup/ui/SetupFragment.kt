@@ -118,7 +118,7 @@ class SetupFragment : BindableFragment<FragmentSetupBinding>(R.layout.fragment_s
         }
 
         activity.getBaseApplication().state.update { ApplicationState.UNLOCKED }
-        findNavController().navigate(R.id.action_setupFragment_to_galleryFragment)
+        findNavController().navigate(SetupFragmentDirections.actionSetupFragmentToGalleryFragment())
     }
 
     private fun enableOrDisableSetup() {
