@@ -17,20 +17,17 @@
 package dev.leonlatsch.photok.videoplayer.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.OptIn
-import androidx.fragment.app.viewModels
+import androidx.compose.ui.platform.ComposeView
+import androidx.fragment.app.Fragment
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import dev.leonlatsch.photok.BR
-import dev.leonlatsch.photok.R
-import dev.leonlatsch.photok.databinding.FragmentVideoPlayerBinding
 import dev.leonlatsch.photok.other.IntentParams
 import dev.leonlatsch.photok.other.extensions.hideSystemUI
-import dev.leonlatsch.photok.uicomponnets.bindings.BindableFragment
 
 /**
  * Fragment to play videos.
@@ -39,44 +36,49 @@ import dev.leonlatsch.photok.uicomponnets.bindings.BindableFragment
  * @author Leon Latsch
  */
 @AndroidEntryPoint
-class VideoPlayerFragment :
-    BindableFragment<FragmentVideoPlayerBinding>(R.layout.fragment_video_player) {
+class VideoPlayerFragment : Fragment() {
 
-    private val viewModel: VideoPlayerViewModel by viewModels()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val photoUUID = arguments?.getString(IntentParams.PHOTO_UUID)
+        if (photoUUID == null) {
+            findNavController().navigateUp()
+            return null
+        }
+
+        return ComposeView(requireContext()).apply {
+            setContent {
+                VideoPlayerScreen(
+                    photoUUID,
+                    findNavController(),
+                )
+            }
+        }
+    }
 
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().hideSystemUI()
 
-        binding.videoPlayerToolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
-        }
+//        TODO
+//        binding.playerView.setControllerVisibilityListener(
+//            PlayerView.ControllerVisibilityListener { visibility ->
+//                binding.videoPlayerAppBarLayout.visibility = visibility
+//            }
+//        )
 
-        viewModel.addOnPropertyChange<ExoPlayer?>(BR.player) {
-            it ?: return@addOnPropertyChange
-            binding.playerView.player = it
-        }
+//        TODO
+//        binding.playerView.showController()
 
-        binding.playerView.setControllerVisibilityListener(
-            PlayerView.ControllerVisibilityListener { visibility ->
-                binding.videoPlayerAppBarLayout.visibility = visibility
-            }
-        )
+//        if (photoUUID == null) {
+//            findNavController().navigateUp()
+//            return
+//        }
 
-        binding.playerView.showController()
-
-        val photoUUID = arguments?.getString(IntentParams.PHOTO_UUID)
-        if (photoUUID == null) {
-            findNavController().navigateUp()
-            return
-        }
-
-        viewModel.setupPlayer(photoUUID)
-    }
-
-    override fun bind(binding: FragmentVideoPlayerBinding) {
-        super.bind(binding)
-        binding.context = this
+//        viewModel.setupPlayer(photoUUID)
     }
 }

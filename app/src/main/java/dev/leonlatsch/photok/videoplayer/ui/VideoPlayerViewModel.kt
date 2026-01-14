@@ -20,6 +20,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.databinding.Bindable
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -36,6 +37,8 @@ import dev.leonlatsch.photok.security.EncryptionManager
 import dev.leonlatsch.photok.uicomponnets.bindings.ObservableViewModel
 import dev.leonlatsch.photok.videoplayer.data.AesDataSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,14 +53,9 @@ class VideoPlayerViewModel @Inject constructor(
     private val app: Application,
     private val photoRepository: PhotoRepository,
     private val encryptionManager: EncryptionManager,
-) : ObservableViewModel(app) {
+) : ViewModel() {
 
-    @get:Bindable
-    var player: ExoPlayer? = null
-        set(value) {
-            field = value
-            notifyChange(BR.player, value)
-        }
+    val player = MutableStateFlow<ExoPlayer?>(null)
 
     /**
      * Create and prepare the [player] to play the passed video.
@@ -68,16 +66,18 @@ class VideoPlayerViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val photo = photoRepository.get(photoUUID)
 
-            player = ExoPlayer.Builder(app)
-                .setMediaSourceFactory(createMediaSourceFactory())
-                .build()
-                .apply {
-                    onMain {
-                        setMediaItem(createMediaItem(photo))
-                        prepare()
-                        playWhenReady = true
+            player.update {
+                ExoPlayer.Builder(app)
+                    .setMediaSourceFactory(createMediaSourceFactory())
+                    .build()
+                    .apply {
+                        onMain {
+                            setMediaItem(createMediaItem(photo))
+                            prepare()
+                            playWhenReady = true
+                        }
                     }
-                }
+            }
         }
     }
 
@@ -107,12 +107,7 @@ class VideoPlayerViewModel @Inject constructor(
      * Release the current player
      */
     fun releasePlayer() {
-        player?.release()
-        player = null
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        releasePlayer()
+        player.value?.release()
+        player.update { null }
     }
 }
