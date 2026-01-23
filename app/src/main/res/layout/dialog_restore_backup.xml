@@ -18,15 +18,15 @@
 
     <data>
 
-        <import type="dev.leonlatsch.photok.databinding.BindingConverters" />
+        <import type="com.app.galleryx.databinding.BindingConverters" />
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.backup.ui.RestoreBackupDialogFragment" />
+            type="com.app.galleryx.backup.ui.RestoreBackupDialogFragment" />
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.backup.ui.RestoreBackupViewModel" />
+            type="com.app.galleryx.backup.ui.RestoreBackupViewModel" />
 
     </data>
 

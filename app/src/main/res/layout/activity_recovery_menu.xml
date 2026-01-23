@@ -21,7 +21,7 @@
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.recoverymenu.RecoveryMenuViewModel" />
+            type="com.app.galleryx.recoverymenu.RecoveryMenuViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

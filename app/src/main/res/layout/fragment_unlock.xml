@@ -23,11 +23,11 @@
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.unlock.ui.UnlockViewModel" />
+            type="com.app.galleryx.unlock.ui.UnlockViewModel" />
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.unlock.ui.UnlockFragment" />
+            type="com.app.galleryx.unlock.ui.UnlockFragment" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -64,7 +64,7 @@
                 android:paddingTop="30dp"
                 android:paddingEnd="20dp">
 
-                <dev.leonlatsch.photok.uicomponnets.PasswordEditText
+                <com.app.galleryx.uicomponnets.PasswordEditText
                     android:id="@+id/unlockPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

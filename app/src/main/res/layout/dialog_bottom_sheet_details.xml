@@ -20,9 +20,9 @@
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.imageviewer.ui.DetailsBottomSheetDialog" />
+            type="com.app.galleryx.imageviewer.ui.DetailsBottomSheetDialog" />
 
-        <import type="dev.leonlatsch.photok.databinding.BindingConverters" />
+        <import type="com.app.galleryx.databinding.BindingConverters" />
     </data>
 
     <LinearLayout

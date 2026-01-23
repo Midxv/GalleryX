@@ -20,13 +20,13 @@
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.settings.ui.hideapp.ToggleAppVisibilityDialog" />
+            type="com.app.galleryx.settings.ui.hideapp.ToggleAppVisibilityDialog" />
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.settings.ui.hideapp.ToggleAppVisibilityViewModel" />
+            type="com.app.galleryx.settings.ui.hideapp.ToggleAppVisibilityViewModel" />
 
-        <import type="dev.leonlatsch.photok.databinding.BindingConverters" />
+        <import type="com.app.galleryx.databinding.BindingConverters" />
     </data>
 
     <LinearLayout

@@ -23,11 +23,11 @@
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.imageviewer.ui.ImageViewerViewModel" />
+            type="com.app.galleryx.imageviewer.ui.ImageViewerViewModel" />
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.imageviewer.ui.ImageViewerFragment" />
+            type="com.app.galleryx.imageviewer.ui.ImageViewerFragment" />
     </data>
 
     <RelativeLayout

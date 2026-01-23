@@ -20,7 +20,7 @@ android {
     compileSdk = VersionCodes.BAKLAVA
 
     defaultConfig {
-        applicationId = "dev.leonlatsch.photok"
+        applicationId = "com.app.galleryx"
         minSdk = VersionCodes.P
         targetSdk = VersionCodes.BAKLAVA
 
@@ -91,7 +91,7 @@ android {
     lint {
         lintConfig = file("$rootDir/gradle/lint.xml")
     }
-    namespace = "dev.leonlatsch.photok"
+    namespace = "com.app.galleryx"
 }
 
 licenseReport {

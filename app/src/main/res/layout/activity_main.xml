@@ -22,7 +22,7 @@
 
         <variable
             name="context"
-            type="dev.leonlatsch.photok.main.ui.MainActivity" />
+            type="com.app.galleryx.main.ui.MainActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

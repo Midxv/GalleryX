@@ -24,7 +24,7 @@
 
         <variable
             name="viewModel"
-            type="dev.leonlatsch.photok.setup.ui.SetupViewModel" />
+            type="com.app.galleryx.setup.ui.SetupViewModel" />
     </data>
 
     <FrameLayout
@@ -71,14 +71,14 @@
                 android:paddingEnd="20dp"
                 android:paddingBottom="20dp">
 
-                <dev.leonlatsch.photok.uicomponnets.PasswordEditText
+                <com.app.galleryx.uicomponnets.PasswordEditText
                     android:id="@+id/setupPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:PasswordEditTextHint="@string/setup_enter_password"
                     app:textValue="@={viewModel.password}" />
 
-                <dev.leonlatsch.photok.uicomponnets.PasswordEditText
+                <com.app.galleryx.uicomponnets.PasswordEditText
                     android:id="@+id/setupConfirmPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
