@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.gallery.albums.detail.ui.compose
@@ -38,6 +38,7 @@ import com.app.galleryx.ui.theme.AppTheme
 fun AlbumDetailContent(
     uiState: AlbumDetailUiState,
     handleUiEvent: (AlbumDetailUiEvent) -> Unit,
+    onMoveToAnotherAlbum: (List<String>) -> Unit, // New callback
     modifier: Modifier = Modifier,
 ) {
     val multiSelectionState =
@@ -68,17 +69,18 @@ fun AlbumDetailContent(
         },
         additionalMultiSelectionActions = {
             HorizontalDivider()
+            // CHANGED: Replaced RemoveFromAlbum with MoveToAlbum UI logic
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.menu_ms_remove_from_album)) },
+                text = { Text(stringResource(R.string.menu_ms_move_to_album)) },
                 onClick = {
-                    handleUiEvent(AlbumDetailUiEvent.RemoveFromAlbum(multiSelectionState.selectedItems.value.toList()))
+                    onMoveToAnotherAlbum(multiSelectionState.selectedItems.value.toList())
                     multiSelectionState.dismissMore()
                     multiSelectionState.cancelSelection()
                 },
                 leadingIcon = {
                     Icon(
-                        painterResource(R.drawable.ic_close),
-                        contentDescription = stringResource(R.string.menu_ms_remove_from_album),
+                        painterResource(R.drawable.ic_folder),
+                        contentDescription = stringResource(R.string.menu_ms_move_to_album),
                     )
                 }
             )
@@ -107,6 +109,7 @@ private fun AlbumsDetailScreenPreview() {
                 )
             ),
             handleUiEvent = {},
+            onMoveToAnotherAlbum = {},
         )
     }
 }

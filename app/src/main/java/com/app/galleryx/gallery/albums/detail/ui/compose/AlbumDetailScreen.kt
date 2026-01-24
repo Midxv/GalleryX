@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.gallery.albums.detail.ui.compose
@@ -37,12 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.app.galleryx.R
 import com.app.galleryx.gallery.albums.detail.ui.AlbumDetailUiEvent
 import com.app.galleryx.gallery.albums.detail.ui.AlbumDetailViewModel
 import com.app.galleryx.gallery.albums.ui.compose.RenameAlbumDialog
+import com.app.galleryx.gallery.components.AlbumPickerDialog
+import com.app.galleryx.gallery.components.AlbumPickerViewModel
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.ui.SortingMenu
 import com.app.galleryx.sort.ui.SortingMenuIconButton
@@ -52,12 +55,20 @@ import com.app.galleryx.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumDetailScreen(viewModel: AlbumDetailViewModel, navController: NavController) {
+fun AlbumDetailScreen(
+    viewModel: AlbumDetailViewModel,
+    navController: NavController,
+    albumPickerViewModel: AlbumPickerViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
+
+    // State for the Move to Album feature
+    var showMoveToAlbumDialog by remember { mutableStateOf(false) }
+    var itemsToMove by remember { mutableStateOf<List<String>>(emptyList()) }
 
     AppTheme {
         Scaffold(
@@ -142,6 +153,10 @@ fun AlbumDetailScreen(viewModel: AlbumDetailViewModel, navController: NavControl
             AlbumDetailContent(
                 uiState = uiState,
                 handleUiEvent = { viewModel.handleUiEvent(it) },
+                onMoveToAnotherAlbum = { items ->
+                    itemsToMove = items
+                    showMoveToAlbumDialog = true
+                },
                 modifier = Modifier
                     .padding(top = contentPadding.calculateTopPadding())
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -162,6 +177,17 @@ fun AlbumDetailScreen(viewModel: AlbumDetailViewModel, navController: NavControl
                     viewModel.handleUiEvent(AlbumDetailUiEvent.RenameAlbum(newName))
                 }
             )
+
+            if (showMoveToAlbumDialog) {
+                AlbumPickerDialog(
+                    viewModel = albumPickerViewModel,
+                    onAlbumSelected = { targetAlbumId ->
+                        viewModel.handleUiEvent(AlbumDetailUiEvent.MoveToAlbum(itemsToMove, targetAlbumId))
+                        showMoveToAlbumDialog = false
+                    },
+                    onDismiss = { showMoveToAlbumDialog = false }
+                )
+            }
         }
     }
 }

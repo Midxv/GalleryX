@@ -1,23 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-~   Copyright 2020–2026 Leon Latsch
-~
-~   Licensed under the Apache License, Version 2.0 (the "License");
-~   you may not use this file except in compliance with the License.
-~   You may obtain a copy of the License at
-~
-~        http://www.apache.org/licenses/LICENSE-2.0
-~
-~   Unless required by applicable law or agreed to in writing, software
-~   distributed under the License is distributed on an "AS IS" BASIS,
-~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-~   See the License for the specific language governing permissions and
-~   limitations under the License.
--->
-
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- COMMON -->
-    <string name="common_copyright_notice">Copyright \u00A9 2020–2026 Leon Latsch</string>
+    <string name="common_copyright_notice">Copyright \u00A9 2020–2026 GalleryX</string>
     <string name="common_slash">/</string>
     <string name="common_percent">%</string>
     <string name="common_pipe">|</string>
@@ -38,12 +22,12 @@
     <string name="common_rename">Rename</string>
     <string name="common_try_again">Try again</string>
 
-    <!-- IMPORT -->
+    <string name="app_launcher_name">GalleryX</string>
+
     <string name="import_importing">Importing File(s)</string>
-    <string name="import_permission_rationale">Photok needs to access your storage, to import files.</string>
+    <string name="import_permission_rationale">GalleryX needs to access your storage, to import files.</string>
     <string name="import_sharted_question">Do you want to import %1$d file(s)?</string>
 
-    <!-- SETUP -->
     <string name="setup_create_your_password">Create your password</string>
     <string name="setup_enter_password">Enter your password</string>
     <string name="setup_confirm_password">Confirm your password</string>
@@ -55,13 +39,11 @@
     <string name="setup_password_match_warning">\u26A0 Passwords do not match</string>
     <string name="setupSetup">Setup</string>
 
-    <!-- UNLOCK -->
-    <string name="unlock_title">Unlock your safe</string>
+    <string name="unlock_title">Unlock GalleryX</string>
     <string name="unlock_enter_password">Enter password</string>
     <string name="unlock_button">Unlock</string>
     <string name="unlock_wrong_password">\u26A0 Wrong password</string>
 
-    <!-- GALLERY -->
     <string name="gallery_placeholder">There are no files in your safe</string>
     <string name="gallery_all_photos_label">All files</string>
     <string name="gallery_albums_label">Albums</string>
@@ -71,19 +53,18 @@
     <string name="gallery_albums_create_placeholder">Homework ;)</string>
     <string name="gallery_albums_select_title">Select an Album</string>
     <string name="gallery_albums_deleted">Album deleted</string>
+    <string name="gallery_albums_moved">Moved to album</string>
     <string name="gallery_albums_photos_added">%1$d items added</string>
     <string name="magic_fab_new_album_label">New Album</string>
 
-    <!-- IMPORT MENU -->
     <string name="import_menu_fab_label">Import</string>
     <string name="import_menu_new_files_title">Import new files</string>
     <string name="import_menu_new_files_description">Import photos and videos from your gallery.</string>
     <string name="import_menu_restore_title">Restore a backup</string>
-    <string name="import_menu_restore_description">Restore a Photok backup. Files will be added to your current files.</string>
+    <string name="import_menu_restore_description">Restore a GalleryX backup. Files will be added to your current files.</string>
     <string name="import_menu_delete_warning">Imported files will be deleted</string>
     <string name="import_menu_album_tooltip">Files will be added to \"%s\" after importing</string>
 
-    <!-- PROCESS -->
     <string name="process_close">Close</string>
     <string name="process_abort">Abort</string>
     <string name="process_finished">Finished</string>
@@ -91,7 +72,6 @@
     <string name="process_aborted">Aborted</string>
     <string name="process_failures_occurred">\u26A0 Some elements could not get processed</string>
 
-    <!-- VIEW PHOTO -->
     <string name="view_photo_detail_title">Details</string>
     <string name="view_photo_detail_file_name_label">Filename:</string>
     <string name="view_photo_detail_import_at_label">Imported at:</string>
@@ -100,44 +80,38 @@
     <string name="view_photo_detail_last_modified">Last modified:</string>
     <string name="view_photo_play_button_description">Play Video</string>
 
-    <!-- MAIN MENU -->
     <string name="menu_main_lock">Lock</string>
     <string name="menu_main_settings">Settings</string>
 
-    <!-- MULTI SELECT MENU -->
     <string name="menu_ms_select_all">Select All</string>
     <string name="menu_ms_delete">Delete</string>
     <string name="menu_ms_export">Export</string>
     <string name="menu_ms_info">%1$d item(s) selected</string>
     <string name="menu_ms_add_to_album">Add to album</string>
-    <string name="menu_ms_remove_from_album">Remove from album</string>
+    <string name="menu_ms_move_to_album">Move to another album</string>
 
-    <!-- DELETE -->
     <string name="delete_are_you_sure">Are you sure, you want to <b>delete</b> %1$d file(s)?</string>
     <string name="delete_are_you_sure_this">Are you sure, you want to <b>delete</b> this file?</string>
     <string name="delete_deleting">Deleting file(s)…</string>
 
-    <!-- EXPORT -->
     <string name="export_are_you_sure">Are you sure, you want to <b>export</b> %1$d file(s), back to your gallery?</string>
     <string name="export_and_delete_are_you_sure">Are you sure, you want to <b>export</b> %1$d file(s), back to your gallery and delete them?</string>
     <string name="export_are_you_sure_this">Are you sure, you want to <b>export</b> this file to your gallery?</string>
     <string name="export_and_delete_are_you_sure_this">Are you sure, you want to <b>export</b> this file to your gallery and delete it?</string>
     <string name="export_exporting">Exporting file(s)…</string>
-    <string name="export_permission_rationale">Photok needs to access your storage, to export files.</string>
+    <string name="export_permission_rationale">GalleryX needs to access your storage, to export files.</string>
     <string name="export_finished">Exported</string>
     <string name="export_and_delete_finished">Exported and deleted</string>
 
-    <!-- ABOUT -->
     <string name="about_version">Version:</string>
     <string name="about_developed_by">Developed by:</string>
-    <string name="about_website_label">leonlatsch.dev</string>
-    <string name="about_website_url">https://leonlatsch.dev</string>
+    <string name="about_website_label">GalleryX</string>
+    <string name="about_website_url">https://google.com</string>
     <string name="about_third_party">Third Party Software</string>
     <string name="about_privacy_policy">Privacy Policy</string>
-    <string name="about_privacy_policy_url">https://leonlatsch.dev/photok_privacy_policy</string>
+    <string name="about_privacy_policy_url">https://google.com</string>
     <string name="about_menu_news">News</string>
 
-    <!-- SETTINGS -->
     <string name="settings_title">Settings</string>
 
     <string name="settings_category_app">App</string>
@@ -157,7 +131,7 @@
     <string name="settings_security_change_password_title">Change Password</string>
     <string name="settings_security_change_password_summary">Change your password</string>
     <string name="settings_security_biometric_title">Biometric Unlock</string>
-    <string name="settings_security_biometric_summary">Unlock Photok with biometric authentication.</string>
+    <string name="settings_security_biometric_summary">Unlock GalleryX with biometric authentication.</string>
     <string name="settings_security_biometric_not_available">Biometric Unlock is not available</string>
     <string name="settings_security_timeout_title">Automatic Lock Timeout</string>
     <string name="settings_security_timeout_summary">Automatic lock after given time in background</string>
@@ -168,8 +142,8 @@
     <string name="settings_security_timeout_ten_minute">10 Minutes</string>
     <string name="settings_security_timeout_never">Never</string>
     <string name="settings_security_launch_code_title">Secret Launch Code</string>
-    <string name="settings_security_launch_code_summary">Secret code to launch Photok from the phone dialer.</string>
-    <string name="settings_security_launch_code_message">Enter *#*#[your code]#*#* in phone dialer to launch Photok.</string>
+    <string name="settings_security_launch_code_summary">Secret code to launch GalleryX from the phone dialer.</string>
+    <string name="settings_security_launch_code_message">Enter *#*#[your code]#*#* in phone dialer to launch GalleryX.</string>
     <string name="settings_security_launch_code_prefix">*#*#</string>
     <string name="settings_security_launch_code_suffix">#*#*</string>
     <string name="settings_security_hide_app_title">Hide App</string>
@@ -190,26 +164,24 @@
     <string name="settings_other_title">Other</string>
     <string name="settings_other_feedback_title">Feedback</string>
     <string name="settings_other_feedback_summary">Send me an email with feedback</string>
-    <string name="settings_other_feedback_mail_subject">Feedback to Photok</string>
-    <string name="settings_other_feedback_mail_body">Write a feedback about Photok :)</string>
-    <string name="settings_other_feedback_mail_emailaddress">photok@leonlatsch.dev</string>
+    <string name="settings_other_feedback_mail_subject">Feedback to GalleryX</string>
+    <string name="settings_other_feedback_mail_body">Write a feedback about GalleryX :)</string>
+    <string name="settings_other_feedback_mail_emailaddress">support@galleryx.com</string>
     <string name="settings_other_donate_title">Donate</string>
-    <string name="settings_other_donate_summary">Support the development of Photok</string>
+    <string name="settings_other_donate_summary">Support the development of GalleryX</string>
     <string name="settings_other_donate_url">https://ko-fi.com/leonlatsch</string>
     <string name="settings_other_sourcecode_title">Source Code</string>
-    <string name="settings_other_sourcecode_summary">Contribute to Photok</string>
+    <string name="settings_other_sourcecode_summary">Contribute to GalleryX</string>
     <string name="settings_other_sourcecode_url">https://github.com/leonlatsch/Photok</string>
     <string name="settings_other_credits_title">Credits</string>
     <string name="settings_other_credits_summary">Contributors and credits</string>
     <string name="settings_other_about_title">About</string>
-    <string name="settings_other_about_summary">Information about Photok</string>
+    <string name="settings_other_about_summary">Information about GalleryX</string>
 
-    <!-- CREDITS -->
     <string name="credits_contributors_title">Contributors</string>
-    <string name="credits_contributors_hint">Visit Photok at GitHub to see all contributors</string>
+    <string name="credits_contributors_hint">Visit GalleryX at GitHub to see all contributors</string>
     <string name="credits_icons_title">Icons</string>
 
-    <!-- CHANGE PASSWORD -->
     <string name="change_password_title">Change your Password</string>
     <string name="change_password_old_password">Old Password</string>
     <string name="change_password_new_password">New Password</string>
@@ -220,22 +192,19 @@
     <string name="change_password_confirm_message">Backup recommended!<br /> Changing your password requires re-encrypting all your files! Do you want to continue?</string>
     <string name="change_password_reencrypting">Re-encrypting file(s)…</string>
 
-    <!-- CHECk PASSWORD -->
     <string name="settings_security_check_password_title">Verify Password</string>
 
-    <!-- HIDE APP -->
-    <string name="hide_app_title_hide">Hide Photok</string>
-    <string name="hide_app_title_show">Show Photok</string>
-    <string name="hide_app_status_label">Photok is currently:</string>
+    <string name="hide_app_title_hide">Hide GalleryX</string>
+    <string name="hide_app_title_show">Show GalleryX</string>
+    <string name="hide_app_status_label">GalleryX is currently:</string>
     <string name="hide_app_status_visible">VISIBLE</string>
     <string name="hide_app_status_hidden">HIDDEN</string>
     <string name="hide_app_app_name_stealth">Phone</string>
-    <string name="hide_app_confirm_hide">Do you really want to hide Photok?</string>
-    <string name="hide_app_confirm_show">Do you want to show Photok again?</string>
-    <string name="hide_app_hint">Once hidden, Photok can only be launched from the phone dial pad, with your secret launch code.</string>
+    <string name="hide_app_confirm_hide">Do you really want to hide GalleryX?</string>
+    <string name="hide_app_confirm_show">Do you want to show GalleryX again?</string>
+    <string name="hide_app_hint">Once hidden, GalleryX can only be launched from the phone dial pad, with your secret launch code.</string>
     <string name="hide_app_hint_current_code">Current launch code:</string>
 
-    <!-- ON BOARDING -->
     <string name="onboarding_next">Next</string>
     <string name="onboarding_finish">Finish</string>
     <string name="onboarding_skip"><u>Skip</u></string>
@@ -247,7 +216,6 @@
     <string name="onboarding_slide3_title">Start Importing</string>
     <string name="onboarding_slide3_description">Start importing your photos and keep them safe from others.\nAfterwards you can delete them in your gallery.</string>
 
-    <!-- BACKUP -->
     <string name="backup_processing_title">Creating backup…</string>
     <string name="backup_restore_title">Restore Backup</string>
     <string name="backup_restore_validating">Validating backup…</string>
@@ -260,7 +228,6 @@
     <string name="backup_restore_processing">Restoring Backup…</string>
     <string name="backup_unlock_title">Unlock Backup</string>
 
-    <!-- NEWS -->
     <string name="news_new_in_title">New in</string>
     <string name="news_view_changelog">View Changelog</string>
     <string name="news_changelog_url">https://github.com/leonlatsch/Photok/releases</string>
@@ -277,14 +244,12 @@
     <string name="news_title_4">Translations and Stability Fixes</string>
     <string name="news_summary_4">Updated translations and multiple fixes improve overall reliability.</string>
 
-    <!-- Recovery Menu -->
     <string name="recovery_subtitle">Recovery Menu</string>
-    <string name="recovery_menu_item_open_photok">Open Photok</string>
+    <string name="recovery_menu_item_open_photok">Open GalleryX</string>
     <string name="recovery_subtitle_reset_hide_app">Reset Hide App Setting</string>
 
-    <!-- Migration -->
     <string name="migration_initial_title_welcome">Welcome to</string>
-    <string name="migration_initial_explaination">This version of Photok introduces a new encryption method. In order to continue to your gallery, there is a migration required.</string>
+    <string name="migration_initial_explaination">This version of GalleryX introduces a new encryption method. In order to continue to your gallery, there is a migration required.</string>
     <string name="migration_initial_button">Get started</string>
 
     <string name="migration_initial_stage_backup_checklist">Backup your data</string>
@@ -314,18 +279,16 @@
     <string name="migration_error_extracting_title">Decrypting to ZIP…</string>
 
 
-    <!-- Biometric -->
-    <string name="biometric_unlock_title">Unlock Photok</string>
+    <string name="biometric_unlock_title">Unlock GalleryX</string>
     <string name="biometric_unlock_subtitle">Verify your identity to unlock</string>
-    <string name="biometric_unlock_cancel">Use Photok password</string>
+    <string name="biometric_unlock_cancel">Use GalleryX password</string>
 
     <string name="biometric_unlock_setup_title">Enable biometric unlock</string>
     <string name="biometric_unlock_setup_subtitle">To enable biometric unlock, confirm your identity</string>
 
-    <string name="biometric_unlock_error">Biometric unlock failed. Use your Photok password.</string>
+    <string name="biometric_unlock_error">Biometric unlock failed. Use your GalleryX password.</string>
     <string name="biometric_unlock_hint_button">Unlock with biometrics</string>
 
-    <!-- Sorting -->
     <string name="sorting_sort">Sort</string>
 
     <string name="sorting_order_asc_label">Ascending</string>
