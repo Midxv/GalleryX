@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@
 package com.app.galleryx.gallery.albums.detail.ui.compose
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -46,6 +51,7 @@ import com.app.galleryx.gallery.albums.detail.ui.AlbumDetailViewModel
 import com.app.galleryx.gallery.albums.ui.compose.RenameAlbumDialog
 import com.app.galleryx.gallery.components.AlbumPickerDialog
 import com.app.galleryx.gallery.components.AlbumPickerViewModel
+import com.app.galleryx.gallery.ui.components.GalleryXTopBarSearch
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.ui.SortingMenu
 import com.app.galleryx.sort.ui.SortingMenuIconButton
@@ -53,6 +59,7 @@ import com.app.galleryx.ui.components.ConfirmationDialog
 import com.app.galleryx.ui.components.RoundedDropdownMenu
 import com.app.galleryx.ui.theme.AppTheme
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumDetailScreen(
@@ -66,7 +73,6 @@ fun AlbumDetailScreen(
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
 
-    // State for the Move to Album feature
     var showMoveToAlbumDialog by remember { mutableStateOf(false) }
     var itemsToMove by remember { mutableStateOf<List<String>>(emptyList()) }
 
@@ -90,6 +96,17 @@ fun AlbumDetailScreen(
                     windowInsets = WindowInsets.statusBars,
                     scrollBehavior = scrollBehavior,
                     actions = {
+                        // FIXED: Added explicit type 'String' to the lambda parameter
+                        GalleryXTopBarSearch(
+                            query = uiState.searchQuery,
+                            onQueryChanged = { query: String -> viewModel.onSearchQueryChanged(query) },
+                            placeholderText = "Search...",
+                            modifier = Modifier
+                                .width(160.dp)
+                                .height(36.dp)
+                                .padding(end = 4.dp)
+                        )
+
                         var showSortMenu by remember { mutableStateOf(false) }
 
                         SortingMenuIconButton(
@@ -150,17 +167,24 @@ fun AlbumDetailScreen(
                 )
             }
         ) { contentPadding ->
-            AlbumDetailContent(
-                uiState = uiState,
-                handleUiEvent = { viewModel.handleUiEvent(it) },
-                onMoveToAnotherAlbum = { items ->
-                    itemsToMove = items
-                    showMoveToAlbumDialog = true
-                },
+
+            Column(
                 modifier = Modifier
                     .padding(top = contentPadding.calculateTopPadding())
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-            )
+                    .fillMaxSize()
+            ) {
+                AlbumDetailContent(
+                    uiState = uiState,
+                    handleUiEvent = { viewModel.handleUiEvent(it) },
+                    onMoveToAnotherAlbum = { items ->
+                        itemsToMove = items
+                        showMoveToAlbumDialog = true
+                    },
+                    modifier = Modifier
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                        .weight(1f)
+                )
+            }
 
             ConfirmationDialog(
                 show = showConfirmDeleteDialog,

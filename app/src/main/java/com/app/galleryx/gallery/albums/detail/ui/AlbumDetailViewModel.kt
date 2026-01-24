@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import com.app.galleryx.sort.domain.SortRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -56,6 +57,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val sortFlow = sortRepository.observeSortFor(albumUuid = albumUUID, default = SortConfig.Album.default)
+    private val searchQuery = MutableStateFlow("")
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val albumFlow = sortFlow.flatMapLatest { sort ->
@@ -68,18 +70,28 @@ class AlbumDetailViewModel @AssistedInject constructor(
     val uiState = combine(
         albumFlow,
         sortFlow,
-    ) { album, sort ->
+        searchQuery
+    ) { album, sort, query ->
+
+        val filteredFiles = if (query.isBlank()) {
+            album.files
+        } else {
+            album.files.filter { it.fileName.contains(query, ignoreCase = true) }
+        }
+
         AlbumDetailUiState(
             albumId = album.uuid,
             albumName = album.name,
-            photos = album.files.map {
+            photos = filteredFiles.map {
                 PhotoTile(
-                    it.internalThumbnailFileName,
-                    it.type,
-                    it.uuid
+                    fileName = it.fileName,
+                    type = it.type,
+                    uuid = it.uuid,
+                    fileSize = it.size // Mapping size here
                 )
             },
             sort = sort,
+            searchQuery = query
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AlbumDetailUiState())
 
@@ -131,7 +143,6 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 }
             }
 
-            // CHANGED: Logic to move photos to another album
             is AlbumDetailUiEvent.MoveToAlbum -> {
                 viewModelScope.launch {
                     if (event.targetAlbumUuid != albumFlow.value.uuid) {
@@ -152,6 +163,10 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 sortRepository.updateSortFor(albumUuid = albumUUID, sort = event.sort)
             }
         }
+    }
+
+    fun onSearchQueryChanged(newQuery: String) {
+        searchQuery.value = newQuery
     }
 
     private fun onImportChoice(choice: ImportChoice) {

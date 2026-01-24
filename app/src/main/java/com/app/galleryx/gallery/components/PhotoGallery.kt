@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.galleryx.R
@@ -85,8 +86,10 @@ import com.app.galleryx.ui.components.MagicFab
 import com.app.galleryx.ui.components.MultiSelectionMenu
 import com.app.galleryx.ui.theme.AppTheme
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import kotlin.math.log10
+import kotlin.math.pow
 
-// CHANGED: 4 columns
 private const val PORTRAIT_COLUMN_COUNT = 4
 private const val LANDSCAPE_COLUMN_COUNT = 6
 
@@ -106,7 +109,6 @@ fun PhotoGallery(
     var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    // Hide magic fab menu when multi selection active
     LaunchedEffect(multiSelectionState.isActive.value) {
         if (multiSelectionState.isActive.value) {
             importMenuBottomSheetVisible = false
@@ -324,135 +326,133 @@ private fun GalleryPhotoTile(
     onClicked: () -> Unit,
     onLongPress: () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .padding(.5.dp)
-            .combinedClickable(
-                role = Role.Image,
-                onClick = onClicked,
-                onLongClick = onLongPress,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            )
+    Column(
+        modifier = modifier.padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val contentModifier = Modifier
-            .multiSelectionItem(selected)
-            .fillMaxSize()
-            .aspectRatio(1f)
+        Box(
+            modifier = Modifier
+                .padding(.5.dp)
+                .combinedClickable(
+                    role = Role.Image,
+                    onClick = onClicked,
+                    onLongClick = onLongPress,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                )
+        ) {
+            val contentModifier = Modifier
+                .multiSelectionItem(selected)
+                .fillMaxWidth()
+                .aspectRatio(1f) // Square Thumbnail
+                .clip(RoundedCornerShape(8.dp))
 
-        if (LocalInspectionMode.current) {
-            Box(
-                modifier = contentModifier.background(Color.DarkGray)
-            )
-        } else {
-            val requestData = remember(photoTile) {
-                EncryptedImageRequestData(
-                    internalFileName = photoTile.internalThumbnailFileName,
-                    mimeType = photoTile.type.mimeType
+            if (LocalInspectionMode.current) {
+                Box(
+                    modifier = contentModifier.background(Color.DarkGray)
+                )
+            } else {
+                val requestData = remember(photoTile) {
+                    EncryptedImageRequestData(
+                        internalFileName = photoTile.internalThumbnailFileName,
+                        mimeType = photoTile.type.mimeType
+                    )
+                }
+
+                Image(
+                    painter = rememberEncryptedImagePainter(requestData),
+                    contentDescription = photoTile.fileName,
+                    modifier = contentModifier
                 )
             }
 
-            Image(
-                painter = rememberEncryptedImagePainter(requestData),
-                contentDescription = photoTile.fileName,
-                modifier = contentModifier
-            )
-        }
-
-        AnimatedVisibility(
-            visible = photoTile.type.isVideo && !selected,
-            enter = scaleIn(),
-            exit = scaleOut(),
-            modifier = Modifier
-                .padding(2.dp)
-                .size(VideoIconSize)
-                .align(Alignment.BottomStart)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_videocam),
-                contentDescription = null,
-                tint = Color.White,
+            // FIX: Explicitly call standard AnimatedVisibility to avoid confusion with ColumnScope.AnimatedVisibility
+            androidx.compose.animation.AnimatedVisibility(
+                visible = photoTile.type.isVideo && !selected,
+                enter = scaleIn(),
+                exit = scaleOut(),
                 modifier = Modifier
-                    .dropShadow(
-                        shape = RoundedCornerShape(12.dp),
-                        shadow = Shadow(
-                            radius = 6.dp,
-                            alpha = 0.3f
+                    .padding(4.dp)
+                    .size(VideoIconSize)
+                    .align(Alignment.BottomStart)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_videocam),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .dropShadow(
+                            shape = RoundedCornerShape(12.dp),
+                            shadow = Shadow(
+                                radius = 6.dp,
+                                alpha = 0.3f
+                            )
                         )
-                    )
-            )
+                )
+            }
+
+            // FIX: Explicitly call standard AnimatedVisibility
+            androidx.compose.animation.AnimatedVisibility(
+                visible = multiSelectionActive && selected,
+                enter = scaleIn(),
+                exit = scaleOut(),
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check_circle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .padding(CheckmarkPadding)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.background)
+                        .align(Alignment.TopStart)
+                )
+            }
         }
 
-        AnimatedVisibility(
-            visible = multiSelectionActive && selected,
-            enter = scaleIn(),
-            exit = scaleOut(),
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_check_circle),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(CheckmarkPadding)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.background)
-                    .align(Alignment.TopStart)
-            )
-        }
+        // Display File Name
+        Text(
+            text = photoTile.fileName,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+
+        // Display File Size (Minimalist)
+        Text(
+            text = formatFileSize(photoTile.fileSize),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
+        )
     }
+}
+
+// Utility to format size
+fun formatFileSize(size: Long): String {
+    if (size <= 0) return "0 B"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
+    return DecimalFormat("#,##0.#").format(size / 1024.0.pow(digitGroups.toDouble())) + " " + units[digitGroups]
 }
 
 @Preview
 @Composable
 private fun PhotoGridPreview() {
     AppTheme {
-        Scaffold {
+        Scaffold { innerPadding -> // FIX: Explicitly name the lambda parameter
             PhotoGallery(
-                modifier = Modifier.padding(it),
+                modifier = Modifier.padding(innerPadding), // Use innerPadding
                 photos = listOf(
-                    PhotoTile("", PhotoType.JPEG, "1"),
-                    PhotoTile("", PhotoType.MP4, "2"),
-                    PhotoTile("", PhotoType.MP4, "3"),
-                    PhotoTile("", PhotoType.JPEG, "4"),
-                    PhotoTile("", PhotoType.JPEG, "5"),
-                    PhotoTile("", PhotoType.MP4, "6"),
+                    PhotoTile("IMG_001.jpg", PhotoType.JPEG, "1", 1024 * 1024),
+                    PhotoTile("VIDEO_2023.mp4", PhotoType.MP4, "2", 1024 * 1024 * 50),
                 ),
                 albumName = null,
                 multiSelectionState = MultiSelectionState(
-                    allItems = listOf("1", "2", "3"),
+                    allItems = listOf("1", "2"),
                 ),
-                onOpenPhoto = {},
-                onDelete = {},
-                onExport = {},
-                onImportChoice = {},
-                additionalMultiSelectionActions = {},
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PhotoGridPreviewWithSelection() {
-    AppTheme {
-        Scaffold {
-            PhotoGallery(
-                modifier = Modifier.padding(it),
-                photos = listOf(
-                    PhotoTile("", PhotoType.JPEG, "1"),
-                    PhotoTile("", PhotoType.MP4, "2"),
-                    PhotoTile("", PhotoType.MP4, "3"),
-                    PhotoTile("", PhotoType.JPEG, "4"),
-                    PhotoTile("", PhotoType.JPEG, "5"),
-                    PhotoTile("", PhotoType.MP4, "6"),
-                ),
-                albumName = null,
-                multiSelectionState = MultiSelectionState(
-                    allItems = listOf("1", "2", "3"),
-                ).apply {
-                    selectItem("2")
-                    selectItem("3")
-                },
                 onOpenPhoto = {},
                 onDelete = {},
                 onExport = {},

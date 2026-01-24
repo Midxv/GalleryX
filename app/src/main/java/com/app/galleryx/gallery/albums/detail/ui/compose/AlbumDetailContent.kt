@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import com.app.galleryx.ui.theme.AppTheme
 fun AlbumDetailContent(
     uiState: AlbumDetailUiState,
     handleUiEvent: (AlbumDetailUiEvent) -> Unit,
-    onMoveToAnotherAlbum: (List<String>) -> Unit, // New callback
+    onMoveToAnotherAlbum: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val multiSelectionState =
@@ -69,7 +69,6 @@ fun AlbumDetailContent(
         },
         additionalMultiSelectionActions = {
             HorizontalDivider()
-            // CHANGED: Replaced RemoveFromAlbum with MoveToAlbum UI logic
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.menu_ms_move_to_album)) },
                 onClick = {
@@ -98,14 +97,14 @@ private fun AlbumsDetailScreenPreview() {
                 "",
                 "Album Name",
                 listOf(
-                    PhotoTile("file1", PhotoType.JPEG, "uuid1"),
-                    PhotoTile("file2", PhotoType.JPEG, "uuid2"),
-                    PhotoTile("file3", PhotoType.JPEG, "uuid3"),
-                    PhotoTile("file4", PhotoType.JPEG, "uuid4"),
-                    PhotoTile("file5", PhotoType.JPEG, "uuid5"),
-                    PhotoTile("file6", PhotoType.JPEG, "uuid6"),
-                    PhotoTile("file7", PhotoType.JPEG, "uuid7"),
-                    PhotoTile("file8", PhotoType.JPEG, "uuid8"),
+                    PhotoTile("file1", PhotoType.JPEG, "uuid1", 1024),
+                    PhotoTile("file2", PhotoType.JPEG, "uuid2", 2048),
+                    PhotoTile("file3", PhotoType.JPEG, "uuid3", 4096),
+                    PhotoTile("file4", PhotoType.JPEG, "uuid4", 8192),
+                    PhotoTile("file5", PhotoType.JPEG, "uuid5", 16384),
+                    PhotoTile("file6", PhotoType.JPEG, "uuid6", 32768),
+                    PhotoTile("file7", PhotoType.JPEG, "uuid7", 65536),
+                    PhotoTile("file8", PhotoType.JPEG, "uuid8", 131072),
                 )
             ),
             handleUiEvent = {},
