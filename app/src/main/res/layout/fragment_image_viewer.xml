@@ -58,7 +58,7 @@
                     android:singleLine="true"
                     android:text="@{viewModel.currentPhoto.fileName, default=fileName}"
                     android:textColor="@android:color/white"
-                    android:textSize="20sp" />
+                    android:textSize="15sp" />
 
             </androidx.appcompat.widget.Toolbar>
 
