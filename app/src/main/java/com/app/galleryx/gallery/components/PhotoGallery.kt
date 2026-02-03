@@ -16,7 +16,6 @@
 
 package com.app.galleryx.gallery.components
 
-import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,34 +30,16 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.TransformableState
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,32 +47,29 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.galleryx.R
 import com.app.galleryx.imageloading.compose.model.EncryptedImageRequestData
 import com.app.galleryx.imageloading.compose.rememberEncryptedImagePainter
-import com.app.galleryx.model.database.entity.PhotoType
 import com.app.galleryx.other.extensions.launchAndIgnoreTimer
 import com.app.galleryx.settings.ui.compose.LocalConfig
 import com.app.galleryx.ui.components.ConfirmationDialog
 import com.app.galleryx.ui.components.MagicFab
 import com.app.galleryx.ui.components.MultiSelectionMenu
-import com.app.galleryx.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.log10
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
-
-private const val PORTRAIT_COLUMN_COUNT = 4
-private const val LANDSCAPE_COLUMN_COUNT = 6
 
 @Composable
 fun PhotoGallery(
@@ -107,7 +85,6 @@ fun PhotoGallery(
 ) {
     val activity = LocalActivity.current
     var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(multiSelectionState.isActive.value) {
         if (multiSelectionState.isActive.value) {
@@ -116,60 +93,63 @@ fun PhotoGallery(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
+        // Pinch to Zoom Logic
+        var scale by remember { mutableFloatStateOf(1f) }
+        var columnCount by remember { mutableIntStateOf(4) } // Default 4
+
+        val transformableState = rememberTransformableState { zoomChange, _, _ ->
+            scale *= zoomChange
+            // Logic to snap scale to column count (2 to 6 columns)
+            if (scale > 1.2f) {
+                columnCount = max(2, columnCount - 1)
+                scale = 1f
+            } else if (scale < 0.8f) {
+                columnCount = min(6, columnCount + 1)
+                scale = 1f
+            }
+        }
+
         PhotoGrid(
             photos = photos,
+            columnCount = columnCount,
             multiSelectionState = multiSelectionState,
             openPhoto = onOpenPhoto,
+            transformableState = transformableState
         )
 
         AnimatedVisibility(
             visible = multiSelectionState.isActive.value.not(),
             enter = slideInVertically { it },
             exit = slideOutVertically { it },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.BottomEnd)
         ) {
             MagicFab(
                 label = stringResource(R.string.import_menu_fab_label),
-                onClick = {
-                    importMenuBottomSheetVisible = true
-                }
+                onClick = { importMenuBottomSheetVisible = true }
             )
         }
 
         ImportMenuBottomSheet(
             open = importMenuBottomSheetVisible,
-            onDismissRequest = {
-                importMenuBottomSheetVisible = false
-            },
+            onDismissRequest = { importMenuBottomSheetVisible = false },
             onImportChoice = onImportChoice,
             albumName = albumName,
         )
 
-        var showDeleteConfirmationDialog by remember {
-            mutableStateOf(false)
-        }
-
-        var showExportConfirmationDialog by remember {
-            mutableStateOf(false)
-        }
-
+        var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
+        var showExportConfirmationDialog by remember { mutableStateOf(false) }
         var exportDirectoryUri by remember { mutableStateOf<Uri?>(null) }
 
-        val pickExportTargetLauncher =
-            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { exportTarget ->
-                exportTarget ?: return@rememberLauncherForActivityResult
-                exportDirectoryUri = exportTarget
-                showExportConfirmationDialog = true
-            }
+        val pickExportTargetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { exportTarget ->
+            exportTarget ?: return@rememberLauncherForActivityResult
+            exportDirectoryUri = exportTarget
+            showExportConfirmationDialog = true
+        }
 
         ConfirmationDialog(
             show = showDeleteConfirmationDialog,
             onDismissRequest = { showDeleteConfirmationDialog = false },
-            text = stringResource(
-                R.string.delete_are_you_sure,
-                multiSelectionState.selectedItems.value.size
-            ),
+            text = stringResource(R.string.delete_are_you_sure, multiSelectionState.selectedItems.value.size),
             onConfirm = {
                 onDelete()
                 multiSelectionState.cancelSelection()
@@ -180,11 +160,7 @@ fun PhotoGallery(
             show = showExportConfirmationDialog,
             onDismissRequest = { showExportConfirmationDialog = false },
             text = stringResource(
-                if (LocalConfig.current?.deleteExportedFiles == true) {
-                    R.string.export_and_delete_are_you_sure
-                } else {
-                    R.string.export_are_you_sure
-                },
+                if (LocalConfig.current?.deleteExportedFiles == true) R.string.export_and_delete_are_you_sure else R.string.export_are_you_sure,
                 multiSelectionState.selectedItems.value.size
             ),
             onConfirm = {
@@ -198,12 +174,7 @@ fun PhotoGallery(
             multiSelectionState = multiSelectionState,
         ) {
             DropdownMenuItem(
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_select_all),
-                        contentDescription = null
-                    )
-                },
+                leadingIcon = { Icon(painter = painterResource(R.drawable.ic_select_all), contentDescription = null) },
                 text = { Text(stringResource(R.string.menu_ms_select_all)) },
                 onClick = {
                     multiSelectionState.selectAll()
@@ -211,12 +182,7 @@ fun PhotoGallery(
                 },
             )
             DropdownMenuItem(
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_delete),
-                        contentDescription = null
-                    )
-                },
+                leadingIcon = { Icon(painter = painterResource(R.drawable.ic_delete), contentDescription = null) },
                 text = { Text(stringResource(R.string.common_delete)) },
                 onClick = {
                     showDeleteConfirmationDialog = true
@@ -224,22 +190,13 @@ fun PhotoGallery(
                 },
             )
             DropdownMenuItem(
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_export),
-                        contentDescription = null
-                    )
-                },
+                leadingIcon = { Icon(painter = painterResource(R.drawable.ic_export), contentDescription = null) },
                 text = { Text(stringResource(R.string.common_export)) },
                 onClick = {
-                    pickExportTargetLauncher.launchAndIgnoreTimer(
-                        input = null,
-                        activity = activity,
-                    )
+                    pickExportTargetLauncher.launchAndIgnoreTimer(input = null, activity = activity)
                     multiSelectionState.dismissMore()
                 },
             )
-
             additionalMultiSelectionActions()
         }
     }
@@ -248,67 +205,85 @@ fun PhotoGallery(
 @Composable
 private fun PhotoGrid(
     photos: List<PhotoTile>,
+    columnCount: Int,
     multiSelectionState: MultiSelectionState,
     openPhoto: (PhotoTile) -> Unit,
+    transformableState: TransformableState,
     modifier: Modifier = Modifier,
 ) {
     val gridState: LazyGridState = rememberLazyGridState()
-
-    val columnCount = when (LocalConfiguration.current.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> PORTRAIT_COLUMN_COUNT
-        Configuration.ORIENTATION_LANDSCAPE -> LANDSCAPE_COLUMN_COUNT
-        else -> PORTRAIT_COLUMN_COUNT
-    }
-
     val haptic = LocalHapticFeedback.current
+
+    // Group photos by Date
+    val groupedPhotos = remember(photos) {
+        photos.groupBy {
+            // Safe date formatting
+            if (it.dateTaken > 0) {
+                SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(it.dateTaken))
+            } else {
+                "Unknown Date"
+            }
+        }
+    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(columnCount),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .transformable(state = transformableState), // Attach Zoom State
         state = gridState
     ) {
-        items(photos, key = { it.uuid }) {
-            GalleryPhotoTile(
-                photoTile = it,
-                multiSelectionActive = multiSelectionState.isActive.value,
-                onClicked = {
-                    if (multiSelectionState.isActive.value.not()) {
-                        openPhoto(it)
-                        return@GalleryPhotoTile
-                    }
+        groupedPhotos.forEach { (dateHeader, photosInDate) ->
+            // Date Header - FIXED SPANNING
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(
+                    text = dateHeader,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
+                        .fillMaxWidth()
+                )
+            }
 
-                    if (multiSelectionState.selectedItems.value.contains(it.uuid)) {
-                        multiSelectionState.deselectItem(it.uuid)
-                    } else {
-                        multiSelectionState.selectItem(it.uuid)
-                    }
-
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                },
-                selected = multiSelectionState.selectedItems.value.contains(it.uuid),
-                onLongPress = {
-                    if (multiSelectionState.isActive.value.not()) {
-                        multiSelectionState.selectItem(it.uuid)
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    }
-                },
-                modifier = Modifier.animateItem(),
-            )
+            // Photos
+            items(photosInDate, key = { it.uuid }) { photo ->
+                GalleryPhotoTile(
+                    photoTile = photo,
+                    multiSelectionActive = multiSelectionState.isActive.value,
+                    onClicked = {
+                        if (multiSelectionState.isActive.value.not()) {
+                            openPhoto(photo)
+                            return@GalleryPhotoTile
+                        }
+                        if (multiSelectionState.selectedItems.value.contains(photo.uuid)) {
+                            multiSelectionState.deselectItem(photo.uuid)
+                        } else {
+                            multiSelectionState.selectItem(photo.uuid)
+                        }
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    },
+                    selected = multiSelectionState.selectedItems.value.contains(photo.uuid),
+                    onLongPress = {
+                        if (multiSelectionState.isActive.value.not()) {
+                            multiSelectionState.selectItem(photo.uuid)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    },
+                    modifier = Modifier.animateItem(),
+                )
+            }
         }
     }
 }
 
-private val VideoIconSize = 20.dp
-private val SelectedPadding = 15.dp
-private val CheckmarkPadding = SelectedPadding - 9.dp
-
+// DEFINED HERE TO FIX "Unresolved reference" ERROR
 @Composable
 fun Modifier.multiSelectionItem(selected: Boolean): Modifier {
     val animatedPadding by animateDpAsState(
-        targetValue = if (selected) { SelectedPadding } else { 0.dp }
+        targetValue = if (selected) { 15.dp } else { 0.dp }, label = "padding"
     )
     val animatedShape by animateDpAsState(
-        targetValue = if (selected) { 12.dp } else { 0.dp }
+        targetValue = if (selected) { 12.dp } else { 0.dp }, label = "shape"
     )
 
     return this
@@ -344,13 +319,11 @@ private fun GalleryPhotoTile(
             val contentModifier = Modifier
                 .multiSelectionItem(selected)
                 .fillMaxWidth()
-                .aspectRatio(1f) // Square Thumbnail
-                .clip(RoundedCornerShape(8.dp))
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
 
             if (LocalInspectionMode.current) {
-                Box(
-                    modifier = contentModifier.background(Color.DarkGray)
-                )
+                Box(modifier = contentModifier.background(Color.DarkGray))
             } else {
                 val requestData = remember(photoTile) {
                     EncryptedImageRequestData(
@@ -358,7 +331,6 @@ private fun GalleryPhotoTile(
                         mimeType = photoTile.type.mimeType
                     )
                 }
-
                 Image(
                     painter = rememberEncryptedImagePainter(requestData),
                     contentDescription = photoTile.fileName,
@@ -366,32 +338,24 @@ private fun GalleryPhotoTile(
                 )
             }
 
-            // FIX: Explicitly call standard AnimatedVisibility to avoid confusion with ColumnScope.AnimatedVisibility
+            // Using full package name to avoid ColumnScope issues if any
             androidx.compose.animation.AnimatedVisibility(
                 visible = photoTile.type.isVideo && !selected,
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier = Modifier
                     .padding(4.dp)
-                    .size(VideoIconSize)
+                    .size(20.dp)
                     .align(Alignment.BottomStart)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_videocam),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier
-                        .dropShadow(
-                            shape = RoundedCornerShape(12.dp),
-                            shadow = Shadow(
-                                radius = 6.dp,
-                                alpha = 0.3f
-                            )
-                        )
+                    modifier = Modifier.dropShadow(shape = RoundedCornerShape(12.dp), shadow = Shadow(radius = 6.dp, alpha = 0.3f))
                 )
             }
 
-            // FIX: Explicitly call standard AnimatedVisibility
             androidx.compose.animation.AnimatedVisibility(
                 visible = multiSelectionActive && selected,
                 enter = scaleIn(),
@@ -402,7 +366,7 @@ private fun GalleryPhotoTile(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
-                        .padding(CheckmarkPadding)
+                        .padding(6.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.background)
                         .align(Alignment.TopStart)
@@ -410,7 +374,6 @@ private fun GalleryPhotoTile(
             }
         }
 
-        // Display File Name
         Text(
             text = photoTile.fileName,
             style = MaterialTheme.typography.bodySmall,
@@ -419,8 +382,6 @@ private fun GalleryPhotoTile(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = 4.dp)
         )
-
-        // Display File Size (Minimalist)
         Text(
             text = formatFileSize(photoTile.fileSize),
             style = MaterialTheme.typography.labelSmall,
@@ -430,35 +391,9 @@ private fun GalleryPhotoTile(
     }
 }
 
-// Utility to format size
 fun formatFileSize(size: Long): String {
     if (size <= 0) return "0 B"
     val units = arrayOf("B", "KB", "MB", "GB", "TB")
     val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
     return DecimalFormat("#,##0.#").format(size / 1024.0.pow(digitGroups.toDouble())) + " " + units[digitGroups]
-}
-
-@Preview
-@Composable
-private fun PhotoGridPreview() {
-    AppTheme {
-        Scaffold { innerPadding -> // FIX: Explicitly name the lambda parameter
-            PhotoGallery(
-                modifier = Modifier.padding(innerPadding), // Use innerPadding
-                photos = listOf(
-                    PhotoTile("IMG_001.jpg", PhotoType.JPEG, "1", 1024 * 1024),
-                    PhotoTile("VIDEO_2023.mp4", PhotoType.MP4, "2", 1024 * 1024 * 50),
-                ),
-                albumName = null,
-                multiSelectionState = MultiSelectionState(
-                    allItems = listOf("1", "2"),
-                ),
-                onOpenPhoto = {},
-                onDelete = {},
-                onExport = {},
-                onImportChoice = {},
-                additionalMultiSelectionActions = {},
-            )
-        }
-    }
 }

@@ -56,9 +56,9 @@ fun GalleryContentPreview() {
         GalleryContent(
             uiState = GalleryUiState.Content(
                 photos = listOf(
-                    PhotoTile("file1.jpg", PhotoType.JPEG, "1", 1024),
-                    PhotoTile("file2.jpg", PhotoType.JPEG, "2", 2048),
-                    PhotoTile("file3.jpg", PhotoType.JPEG, "3", 4096)
+                    PhotoTile("file1.jpg", PhotoType.JPEG, "1", 1024, System.currentTimeMillis()),
+                    PhotoTile("file2.jpg", PhotoType.JPEG, "2", 2048, System.currentTimeMillis()),
+                    PhotoTile("file3.jpg", PhotoType.JPEG, "3", 4096, System.currentTimeMillis())
                 ),
                 sort = SortConfig.Gallery.default
             ),

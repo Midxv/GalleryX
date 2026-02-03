@@ -131,7 +131,7 @@
                         android:onClick="@{() -> viewModel.savePassword()}"
                         android:text="@string/setup_button"
                         android:backgroundTint="@color/colorPrimary"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/colorComplementary"
                         style="@style/Widget.MaterialComponents.Button"/>
 
                 </LinearLayout>

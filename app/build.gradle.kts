@@ -125,6 +125,7 @@ dependencies {
     // Room
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-paging:2.8.4")
+    implementation("androidx.compose.foundation:foundation-layout:1.10.2")
     kapt("androidx.room:room-compiler:2.8.4")
 
     // Kotlin Extensions and Coroutines support for Room

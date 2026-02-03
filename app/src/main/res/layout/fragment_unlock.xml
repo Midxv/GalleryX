@@ -85,12 +85,14 @@
                     android:visibility="invisible" />
 
                 <Button
+                    android:id="@+id/unlockButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:onClick="@{() -> viewModel.unlock()}"
                     android:text="@string/unlock_button"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@android:color/white"
+                    android:backgroundTint="#6200EE"
+                    android:textColor="@color/colorComplementary"
+                    android:visibility="visible"
                     style="@style/Widget.MaterialComponents.Button"/>
 
             </LinearLayout>

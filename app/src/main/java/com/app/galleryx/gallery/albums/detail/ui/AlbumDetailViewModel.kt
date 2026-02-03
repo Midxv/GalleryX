@@ -87,7 +87,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     fileName = it.fileName,
                     type = it.type,
                     uuid = it.uuid,
-                    fileSize = it.size // Mapping size here
+                    fileSize = it.size,
+                    dateTaken = it.importedAt // Added for Date Headers
                 )
             },
             sort = sort,
