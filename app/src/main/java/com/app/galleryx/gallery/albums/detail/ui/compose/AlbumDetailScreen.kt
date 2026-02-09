@@ -20,7 +20,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -51,7 +50,7 @@ import com.app.galleryx.gallery.albums.detail.ui.AlbumDetailViewModel
 import com.app.galleryx.gallery.albums.ui.compose.RenameAlbumDialog
 import com.app.galleryx.gallery.components.AlbumPickerDialog
 import com.app.galleryx.gallery.components.AlbumPickerViewModel
-import com.app.galleryx.gallery.ui.components.GalleryXTopBarSearch
+import com.app.galleryx.gallery.ui.components.GalleryXActionSearchBar
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.ui.SortingMenu
 import com.app.galleryx.sort.ui.SortingMenuIconButton
@@ -65,6 +64,7 @@ import com.app.galleryx.ui.theme.AppTheme
 fun AlbumDetailScreen(
     viewModel: AlbumDetailViewModel,
     navController: NavController,
+    onSettingsClicked: () -> Unit,
     albumPickerViewModel: AlbumPickerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,7 +72,6 @@ fun AlbumDetailScreen(
 
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
-
     var showMoveToAlbumDialog by remember { mutableStateOf(false) }
     var itemsToMove by remember { mutableStateOf<List<String>>(emptyList()) }
 
@@ -84,9 +83,7 @@ fun AlbumDetailScreen(
                 LargeTopAppBar(
                     title = { Text(uiState.albumName) },
                     navigationIcon = {
-                        IconButton(
-                            onClick = { navController.navigateUp() }
-                        ) {
+                        IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_back),
                                 contentDescription = stringResource(R.string.process_close)
@@ -96,14 +93,13 @@ fun AlbumDetailScreen(
                     windowInsets = WindowInsets.statusBars,
                     scrollBehavior = scrollBehavior,
                     actions = {
-                        // FIXED: Added explicit type 'String' to the lambda parameter
-                        GalleryXTopBarSearch(
+                        // FIXED: Use specific Action Search Bar and increase width
+                        GalleryXActionSearchBar(
                             query = uiState.searchQuery,
                             onQueryChanged = { query: String -> viewModel.onSearchQueryChanged(query) },
                             placeholderText = "Search...",
                             modifier = Modifier
-                                .width(160.dp)
-                                .height(36.dp)
+                                .width(240.dp) // "A little big"
                                 .padding(end = 4.dp)
                         )
 

@@ -27,6 +27,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
+import com.app.galleryx.R
 import com.app.galleryx.gallery.albums.detail.ui.compose.AlbumDetailScreen
 import com.app.galleryx.gallery.ui.navigation.PhotoActionsNavigator
 import com.app.galleryx.imageloading.compose.LocalEncryptedImageLoader
@@ -72,7 +73,13 @@ class AlbumDetailFragment : Fragment() {
                         LocalEncryptedImageLoader provides encryptedImageLoader,
                         LocalConfig provides config,
                     ) {
-                        AlbumDetailScreen(viewModel, findNavController())
+                        AlbumDetailScreen(
+                            viewModel = viewModel,
+                            navController = findNavController(),
+                            onSettingsClicked = {
+                                findNavController().navigate(R.id.settingsFragment)
+                            }
+                        )
                     }
                 }
             }
@@ -84,13 +91,13 @@ class AlbumDetailFragment : Fragment() {
 
         launchLifecycleAwareJob {
             viewModel.photoActions.collect { action ->
-                photoActionsNavigator.navigate(action, findNavController(), this)
+                photoActionsNavigator.navigate(action, findNavController(), this@AlbumDetailFragment)
             }
         }
 
         launchLifecycleAwareJob {
             viewModel.navEvents.collect { event ->
-                albumDetailNavigator.navigate(event, this)
+                albumDetailNavigator.navigate(event, this@AlbumDetailFragment)
             }
         }
     }

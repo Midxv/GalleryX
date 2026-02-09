@@ -31,7 +31,7 @@ fun AlbumsGrid(
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(3),
         modifier = modifier.fillMaxWidth()
     ) {
         items(albums, key = { it.id }) { album ->

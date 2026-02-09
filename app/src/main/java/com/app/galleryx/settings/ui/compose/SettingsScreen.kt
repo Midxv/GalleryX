@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.settings.ui.compose
@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +38,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -88,8 +91,6 @@ import com.app.galleryx.settings.domain.models.SystemDesignEnum
 import com.app.galleryx.settings.ui.SettingsFragment
 import com.app.galleryx.settings.ui.changepassword.ChangePasswordDialog
 import com.app.galleryx.settings.ui.checkpassword.CheckPasswordDialog
-import com.app.galleryx.settings.ui.hideapp.SecretLaunchCodeDialog
-import com.app.galleryx.settings.ui.hideapp.ToggleAppVisibilityDialog
 import com.app.galleryx.ui.LocalFragment
 import com.app.galleryx.ui.theme.AppTheme
 import com.app.galleryx.uicomponnets.Dialogs
@@ -112,8 +113,6 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
         BackupBottomSheetDialogFragment(uri, BackupStrategy.Name.Default).show(fragment.parentFragmentManager)
     }
 
-    var showSecretLaunchCodeDialog by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         fragment ?: return@LaunchedEffect
 
@@ -132,15 +131,8 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
             viewModel.onBiometricUnlockChanged(it, fragment)
         }
 
-        viewModel.registerPreferenceCallback(Config.SECURITY_DIAL_LAUNCH_CODE) {
-            showSecretLaunchCodeDialog = true
-            false
-        }
-
-        viewModel.registerPreferenceCallback(SettingsFragment.KEY_ACTION_HIDE_APP) {
-            ToggleAppVisibilityDialog().show(fragment.childFragmentManager)
-            false
-        }
+        // REMOVED: Secret Launch Code callback
+        // REMOVED: Hide App callback
 
         viewModel.registerPreferenceCallback(SettingsFragment.KEY_ACTION_RESET) {
             CheckPasswordDialog {
@@ -197,11 +189,6 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
             false
         }
     }
-
-    SecretLaunchCodeDialog(
-        show = showSecretLaunchCodeDialog,
-        onDismissRequest = { showSecretLaunchCodeDialog = false },
-    )
 }
 
 @Composable
@@ -219,7 +206,6 @@ fun SettingsScreen() {
     }
 
     SettingsCallbacks(viewModel)
-
 }
 
 
@@ -230,6 +216,7 @@ fun SettingsContent(
     handleUiEvent: (SettingsUiEvent) -> Unit,
 ) {
     val fragment = LocalFragment.current
+    val navController = fragment?.findNavController()
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -241,14 +228,27 @@ fun SettingsContent(
                             text = stringResource(R.string.settings_title)
                         )
                     },
+                    // Added Navigation Icon (Back Arrow)
+                    navigationIcon = {
+                        if (navController != null) {
+                            IconButton(onClick = { navController.navigateUp() }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_back),
+                                    contentDescription = stringResource(R.string.process_close)
+                                )
+                            }
+                        }
+                    },
                     scrollBehavior = scrollBehavior,
+                    windowInsets = WindowInsets.statusBars // Respect Notch
                 )
-            }
+            },
+            // Added modifier to respect nested scroll
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
         ) { contentPadding ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .verticalScroll(rememberScrollState())
                     .padding(contentPadding)
             ) {
@@ -259,6 +259,12 @@ fun SettingsContent(
                         section = section,
                     ) {
                         for (preference in section.preferences) {
+                            // FILTER OUT HIDDEN ITEMS
+                            if (preference.key == SettingsFragment.KEY_ACTION_HIDE_APP ||
+                                preference.key == Config.SECURITY_DIAL_LAUNCH_CODE) {
+                                continue
+                            }
+
                             when (preference) {
                                 is Preference.Simple -> {
                                     PreferenceView(
@@ -418,7 +424,7 @@ fun PreferenceSwitchView(
     modifier: Modifier = Modifier,
 ) {
     val preferencesValues = LocalPreferencesValues.current
-    
+
     val summary = stringResource(preference.summary)
     val value = preferencesValues[preference.key] as? Boolean ?: preference.default
 
@@ -503,4 +509,3 @@ private fun Preview() {
         }
     }
 }
-

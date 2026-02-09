@@ -19,29 +19,22 @@ package com.app.galleryx.main.ui
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.app.galleryx.R
 import com.app.galleryx.databinding.ActivityMainBinding
-import com.app.galleryx.main.ui.navigation.MainMenu
 import com.app.galleryx.settings.data.Config
-import com.app.galleryx.ui.theme.AppTheme
 import com.app.galleryx.uicomponnets.bindings.BindableActivity
 import javax.inject.Inject
 
-// CHANGED: Removed R.id.galleryFragment from this list
-val FragmentsWithMenu = listOf(R.id.albumsFragment, R.id.settingsFragment, R.id.albumDetailFragment)
-
 /**
  * The main Activity.
- * Holds all fragments and initializes toolbar, menu, etc.
+ * Holds all fragments and initializes toolbar.
  *
  * @since 1.0.0
  * @author Leon Latsch
@@ -66,30 +59,39 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
         dispatchIntent()
 
         findNavController(R.id.mainNavHostFragment).let { navController ->
-            navController.addOnDestinationChangedListener { controller, destination, arguments ->
-                val showMenu = FragmentsWithMenu.contains(destination.id)
-                binding.mainMenuComposeContainer.isVisible = showMenu
+            navController.addOnDestinationChangedListener { _, destination, _ ->
 
+                // Logic to update status bar appearance
                 WindowCompat.getInsetsController(
                     window, window.decorView
                 ).isAppearanceLightStatusBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
                 viewModel.onDestinationChanged(destination.id)
             }
-
         }
     }
 
     private fun dispatchIntent() {
         when (intent.action) {
-            Intent.ACTION_SEND -> intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.let { uri ->
-                viewModel.addUriToSharedUriStore(uri)
+            Intent.ACTION_SEND -> {
+                val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                }
+                uri?.let { viewModel.addUriToSharedUriStore(it) }
             }
 
-            Intent.ACTION_SEND_MULTIPLE ->
-                intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)?.forEach { uri ->
-                    viewModel.addUriToSharedUriStore(uri)
+            Intent.ACTION_SEND_MULTIPLE -> {
+                val uris = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
                 }
+                uris?.forEach { viewModel.addUriToSharedUriStore(it) }
+            }
         }
     }
 
@@ -102,15 +104,6 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
     override fun bind(binding: ActivityMainBinding) {
         super.bind(binding)
         binding.context = this
-
-        binding.mainMenuComposeContainer.setContent {
-            val uiState by viewModel.mainMenuUiState.collectAsStateWithLifecycle()
-
-            AppTheme {
-                MainMenu(uiState) {
-                    findNavController(R.id.mainNavHostFragment).navigate(it)
-                }
-            }
-        }
+        // Bottom Navigation Menu setup removed
     }
 }

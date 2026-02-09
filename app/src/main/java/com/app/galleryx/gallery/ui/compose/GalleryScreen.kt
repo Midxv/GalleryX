@@ -17,36 +17,50 @@
 package com.app.galleryx.gallery.ui.compose
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.app.galleryx.R
 import com.app.galleryx.gallery.ui.GalleryViewModel
+import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
 import com.app.galleryx.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(viewModel: GalleryViewModel) {
+fun GalleryScreen(
+    viewModel: GalleryViewModel,
+    onSettingsClicked: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    // State for the search query
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
+    // Handler to open URLs
+    val uriHandler = LocalUriHandler.current
 
     AppTheme {
         Scaffold(
             topBar = {
-                LargeTopAppBar(
-                    title = { Text(stringResource(R.string.gallery_all_photos_label)) },
-                    scrollBehavior = scrollBehavior
+                GalleryXHomeTopBar(
+                    query = searchQuery,
+                    onQueryChanged = { newQuery: String ->
+                        searchQuery = newQuery
+                        // TODO: Pass query to viewModel if filtering is implemented
+                        // viewModel.onSearchQueryChanged(newQuery)
+                    },
+                    onSettingsClicked = onSettingsClicked,
+                    // FIXED: Added onLogoClicked parameter
+                    onLogoClicked = {
+                        uriHandler.openUri("https://github.com/midxv/galleryx")
+                    },
+                    placeholderText = "Search photos..."
                 )
-            },
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+            }
         ) { contentPadding ->
             val modifier = Modifier.padding(top = contentPadding.calculateTopPadding())
 
@@ -59,7 +73,6 @@ fun GalleryScreen(viewModel: GalleryViewModel) {
                     uiState = state,
                     handleUiEvent = { viewModel.handleUiEvent(it) },
                     modifier = modifier
-                    // FIXED: Removed multiSelectionState = ...
                 )
             }
         }

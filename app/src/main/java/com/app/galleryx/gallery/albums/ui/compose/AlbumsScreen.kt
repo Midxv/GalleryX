@@ -18,70 +18,62 @@ package com.app.galleryx.gallery.albums.ui.compose
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.app.galleryx.R
 import com.app.galleryx.gallery.albums.ui.AlbumsUiEvent
 import com.app.galleryx.gallery.albums.ui.AlbumsViewModel
 import com.app.galleryx.gallery.components.ImportSharedDialog
-import com.app.galleryx.gallery.ui.components.GalleryXTopBarSearch
+import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
 import com.app.galleryx.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlbumsScreen(viewModel: AlbumsViewModel) {
+fun AlbumsScreen(
+    viewModel: AlbumsViewModel,
+    onSettingsClicked: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val uriHandler = LocalUriHandler.current
 
     AppTheme {
         Scaffold(
             topBar = {
-                LargeTopAppBar(
-                    title = { Text(stringResource(R.string.gallery_albums_label)) },
-                    scrollBehavior = scrollBehavior,
-                    actions = {
-                        // FIXED: Added explicit type 'String' to the lambda parameter
-                        GalleryXTopBarSearch(
-                            query = uiState.searchQuery,
-                            onQueryChanged = { query: String -> viewModel.onSearchQueryChanged(query) },
-                            placeholderText = "Search...",
-                            modifier = Modifier
-                                .width(160.dp)
-                                .height(36.dp)
-                                .padding(end = 8.dp)
-                        )
-                    }
+                GalleryXHomeTopBar(
+                    query = searchQuery,
+                    onQueryChanged = { newQuery: String ->
+                        searchQuery = newQuery
+                        viewModel.onSearchQueryChanged(newQuery)
+                    },
+                    onSettingsClicked = onSettingsClicked,
+                    onLogoClicked = {
+                        uriHandler.openUri("https://github.com/midxv/galleryx")
+                    },
+                    placeholderText = "Search albums..."
                 )
-            },
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            }
         ) { contentPadding ->
 
             Column(
                 modifier = Modifier
-                    .padding(top = contentPadding.calculateTopPadding())
+                    .padding(contentPadding)
                     .fillMaxSize()
             ) {
-                when (uiState) {
+                when (val state = uiState) {
                     is AlbumsUiState.Empty -> AlbumsPlaceholder(
                         handleUiEvent = { viewModel.handleUiEvent(it) },
                         modifier = Modifier.weight(1f)
                     )
 
                     is AlbumsUiState.Content -> AlbumsContent(
-                        content = uiState as AlbumsUiState.Content,
+                        content = state,
                         handleUiEvent = { viewModel.handleUiEvent(it) },
                         modifier = Modifier.weight(1f)
                     )

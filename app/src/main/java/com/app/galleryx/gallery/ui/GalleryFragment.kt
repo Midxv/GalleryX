@@ -27,6 +27,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
+import com.app.galleryx.R
 import com.app.galleryx.gallery.ui.compose.GalleryScreen
 import com.app.galleryx.gallery.ui.navigation.GalleryNavigationEvent
 import com.app.galleryx.gallery.ui.navigation.GalleryNavigator
@@ -69,8 +70,12 @@ class GalleryFragment : Fragment() {
                         LocalEncryptedImageLoader provides encryptedImageLoader,
                         LocalConfig provides config
                     ) {
-                        // Fixed: Removed extra arguments. GalleryScreen now only takes the ViewModel.
-                        GalleryScreen(viewModel)
+                        GalleryScreen(
+                            viewModel = viewModel,
+                            onSettingsClicked = {
+                                findNavController().navigate(R.id.settingsFragment)
+                            }
+                        )
                     }
                 }
             }
@@ -81,7 +86,6 @@ class GalleryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         launchLifecycleAwareJob {
-            // Fixed: Explicit type for 'event' to help compiler inference
             viewModel.eventsFlow.collect { event: GalleryNavigationEvent ->
                 galleryNavigator.navigate(event, this@GalleryFragment)
             }

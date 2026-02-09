@@ -62,7 +62,6 @@
         android:name="com.app.galleryx.unlock.ui.UnlockFragment"
         android:label="fragment_unlock"
         tools:layout="@layout/fragment_unlock">
-
         <action
             android:id="@+id/action_unlockFragment_to_galleryFragment"
             app:destination="@id/albumsFragment"
@@ -70,13 +69,11 @@
             app:exitAnim="@android:anim/fade_out"
             app:popUpTo="@id/unlockFragment"
             app:popUpToInclusive="true" />
-
         <action
             android:id="@+id/action_unlockFragment_to_encryptionMigrationFragment"
             app:destination="@id/encryptionMigrationFragment"
             app:popUpTo="@id/unlockFragment"
             app:popUpToInclusive="true" />
-
         <action
             android:id="@+id/action_unlockFragment_to_albumsFragment"
             app:destination="@id/albumsFragment"
@@ -165,11 +162,6 @@
             android:defaultValue="-1"
             app:argType="integer" />
     </fragment>
-
-    <fragment
-        android:id="@+id/galleryFragment"
-        android:name="com.app.galleryx.gallery.ui.GalleryFragment"
-        android:label="GalleryFragment" />
 
     <fragment
         android:id="@+id/albumsFragment"
