@@ -27,9 +27,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +69,9 @@ fun AlbumDetailScreen(
     albumPickerViewModel: AlbumPickerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    // CHANGED: Use pinnedScrollBehavior for a fixed, smaller TopAppBar
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -80,8 +83,15 @@ fun AlbumDetailScreen(
             topBar = {
                 var showMore by remember { mutableStateOf(false) }
 
-                LargeTopAppBar(
-                    title = { Text(uiState.albumName) },
+                // CHANGED: Replaced LargeTopAppBar with standard TopAppBar for smaller height
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = uiState.albumName,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
@@ -93,13 +103,12 @@ fun AlbumDetailScreen(
                     windowInsets = WindowInsets.statusBars,
                     scrollBehavior = scrollBehavior,
                     actions = {
-                        // FIXED: Use specific Action Search Bar and increase width
                         GalleryXActionSearchBar(
                             query = uiState.searchQuery,
                             onQueryChanged = { query: String -> viewModel.onSearchQueryChanged(query) },
                             placeholderText = "Search...",
                             modifier = Modifier
-                                .width(240.dp) // "A little big"
+                                .width(200.dp) // Adjusted width slightly for the smaller bar
                                 .padding(end = 4.dp)
                         )
 
