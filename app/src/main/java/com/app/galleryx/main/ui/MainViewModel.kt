@@ -52,12 +52,11 @@ class MainViewModel @Inject constructor(
     fun onDestinationChanged(id: Int) {
         _mainMenuUiState.update { it.copy(currentFragmentId = id) }
 
-        // Show the nav bar ONLY on the main dashboard screens
+        // Show the nav bar ONLY on the main dashboard screens (Hidden inside albums now)
         _showBottomNav.value = id in listOf(
             R.id.galleryFragment,
             R.id.albumsFragment,
-            R.id.settingsFragment,
-            R.id.albumDetailFragment
+            R.id.settingsFragment
         )
     }
 }
