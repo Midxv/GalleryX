@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="res/drawable/applogo.png" alt="GalleryX Logo" width="150"/>
+  <img src="Public/assets/applogo.jpg" alt="GalleryX Logo" width="150"/>
 </p>
 
 <h1 align="center">GalleryX</h1>
