@@ -12,8 +12,8 @@
       "filters": [],
       "attributes": [],
       "versionCode": 53,
-      "versionName": "2.4.2",
-      "outputFile": "photok-2.4.2-play-release.apk"
+      "versionName": "1.5",
+      "outputFile": "photok-1.5-play-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/photok-2.4.2-play-release.dm"
+        "baselineProfiles/1/photok-1.5-play-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/photok-2.4.2-play-release.dm"
+        "baselineProfiles/0/photok-1.5-play-release.dm"
       ]
     }
   ],

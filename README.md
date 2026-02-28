@@ -1,44 +1,62 @@
-# GalleryX 🔒✨
-
-**GalleryX** is a secure, privacy-first gallery vault for Android. It keeps your photos and videos safe using military-grade **AES-256 encryption**, all wrapped in a stunning **AMOLED Black** interface.
-
 <p align="center">
-  <img src="app/src/main/res/drawable/ic_gallery_x.xml" width="120" alt="GalleryX Icon" />
+  <img src="res/drawable/applogo.png" alt="GalleryX Logo" width="150"/>
 </p>
 
-## 🔥 Features
+<h1 align="center">GalleryX</h1>
 
-* **🛡️ Ironclad Security:** Every photo and video is encrypted with **AES-256**. Your files are unreadable without your password.
-* **🌚 True AMOLED Dark Mode:** A sleek, pitch-black UI designed for modern screens and battery saving.
-* **👻 Stealth Mode:** Hide the app icon and launch it via a secret dialer code.
-* **⚡ Smooth Performance:** Optimized grid layouts and transitions for a fluid experience.
-* **☁️ No Cloud, No Tracking:** Your data never leaves your device. 100% offline and private.
-* **📂 Easy Import/Export:** seamlessly import from your gallery and export back when needed.
+<p align="center">
+  <strong>A highly secure, privacy-first photo and video vault for Android.</strong>
+</p>
 
-## 🛠️ Built With
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Platform">
+  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Architecture-MVVM-blue" alt="Architecture">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+</p>
 
-* **Kotlin** - 100%
-* **Jetpack Compose** - Modern UI toolkit
-* **Hilt** - Dependency Injection
-* **Room Database** - Robust local data storage
-* **ExoPlayer** - High-performance video playback
+---
+
+## 📖 About GalleryX
+GalleryX is a robust Android application designed to keep your personal media truly private. Built with modern Android development practices, it encrypts your photos and videos locally, ensuring that no one can access your private moments without your permission.
+
+Whether you need to hide sensitive documents, personal photos, or private videos, GalleryX provides bank-grade encryption paired with an intuitive, fluid user interface.
+
+## ✨ Key Features
+* **🔒 AES-256 Encryption:** Your media is fully encrypted on your local storage. No cloud leaks, no unauthorized access.
+* **👻 Stealth Mode / App Hiding:** Disguise the app or hide it entirely from the launcher. Launch it via a secret dialer code.
+* **👆 Biometric Unlock:** Quickly and securely access your vault using your device's fingerprint or face unlock.
+* **📁 Smart Album Management:** Organize your encrypted photos and videos into custom albums.
+* **☁️ Encrypted Backups:** Safely backup and restore your encrypted vault so you never lose your memories.
+* **🎥 Built-in Media Player:** View your photos and stream your encrypted videos directly inside the app without decrypting them to public storage first.
+
+## 📱 Screenshots
+
+<p align="center">
+  <img src="Public/assets/Screenshot_2026-02-28-15-42-15-461_com.app.galleryx.foss.jpg" width="24%" />
+  <img src="Public/assets/Screenshot_2026-02-28-15-42-17-547_com.app.galleryx.foss.jpg" width="24%" />
+  <img src="Public/assets/Screenshot_2026-02-28-15-42-22-624_com.app.galleryx.foss.jpg" width="24%" />
+  <img src="Public/assets/Screenshot_2026-02-28-15-42-30-951_com.app.galleryx.foss.jpg" width="24%" />
+</p>
+
+## 🛠️ Tech Stack & Architecture
+GalleryX is built using the latest Android development standards:
+* **Language:** [Kotlin](https://kotlinlang.org/) (100%)
+* **UI Toolkit:** Jetpack Compose & XML (Hybrid approach)
+* **Architecture:** MVVM (Model-View-ViewModel)
+* **Local Database:** Room Database
+* **Concurrency:** Kotlin Coroutines & Flow
+* **Dependency Injection:** Dagger Hilt
+* **Security:** Android Keystore System, BiometricPrompt API, AES Encryption
 
 ## 🚀 Getting Started
 
-1.  **Clone the repo:**
-    ```bash
-    git clone [https://github.com/Midxv/GalleryX.git](https://github.com/Midxv/GalleryX.git)
-    ```
-2.  Open in **Android Studio**.
-3.  Build and Run on your device!
+### Prerequisites
+* Android Studio (Latest Version)
+* JDK 17+
+* Minimum SDK: 24 (Android 7.0)
 
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-## 📄 License
-
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
-
----
-*Based on the open-source Photok project.*
+### Building the Project
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/Midxv/GalleryX.git](https://github.com/Midxv/GalleryX.git)
