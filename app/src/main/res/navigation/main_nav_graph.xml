@@ -45,7 +45,7 @@
         tools:layout="@layout/fragment_setup">
         <action
             android:id="@+id/action_setupFragment_to_galleryFragment"
-            app:destination="@id/albumsFragment"
+            app:destination="@id/galleryFragment"
             app:enterAnim="@android:anim/fade_in"
             app:exitAnim="@android:anim/fade_out"
             app:popUpTo="@id/setupFragment"
@@ -64,7 +64,7 @@
         tools:layout="@layout/fragment_unlock">
         <action
             android:id="@+id/action_unlockFragment_to_galleryFragment"
-            app:destination="@id/albumsFragment"
+            app:destination="@id/galleryFragment"
             app:enterAnim="@android:anim/fade_in"
             app:exitAnim="@android:anim/fade_out"
             app:popUpTo="@id/unlockFragment"
@@ -164,6 +164,11 @@
     </fragment>
 
     <fragment
+        android:id="@+id/galleryFragment"
+        android:name="com.app.galleryx.gallery.ui.GalleryFragment"
+        android:label="GalleryFragment" />
+
+    <fragment
         android:id="@+id/albumsFragment"
         android:name="com.app.galleryx.gallery.albums.ui.AlbumsFragment"
         android:label="GalleryFragment">
@@ -204,7 +209,7 @@
         android:label="EncryptionMigrationFragment" >
         <action
             android:id="@+id/action_encryptionMigrationFragment_to_galleryFragment"
-            app:destination="@id/albumsFragment"
+            app:destination="@id/galleryFragment"
             app:popUpTo="@id/encryptionMigrationFragment"
             app:popUpToInclusive="true" />
     </fragment>

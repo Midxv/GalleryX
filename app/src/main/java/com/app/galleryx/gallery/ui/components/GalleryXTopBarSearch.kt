@@ -16,12 +16,9 @@
 
 package com.app.galleryx.gallery.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,60 +35,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.app.galleryx.R
 
 /**
- * The Top Bar for the Home (Albums) Screen.
- * Layout: [Violet Settings Gear] [Spacer] [Long Search Bar] [Spacer] [GalleryX Logo]
+ * The Top Bar for the Home Screen.
+ * Now a full-width clean search bar just below the status bar/notch.
  */
 @Composable
 fun GalleryXHomeTopBar(
     query: String,
     onQueryChanged: (String) -> Unit,
-    onSettingsClicked: () -> Unit,
-    onLogoClicked: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") onSettingsClicked: () -> Unit, // Kept to prevent compiler crash
+    @Suppress("UNUSED_PARAMETER") onLogoClicked: () -> Unit,     // Kept to prevent compiler crash
     placeholderText: String = "Search...",
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // Make it a "square round rectangle" (Square top for status bar, Rounded bottom)
             .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding()
-            // Increased padding to 16.dp to make it "a little big"
+            .statusBarsPadding() // Hugs the notch perfectly
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: Settings Gear Icon with Violet Background
+
+        // Full Width Search Box
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(12.dp)) // Rectangular with slight radius
-                .background(Color(0xFF8A2BE2)) // Violet Color
-                .clickable { onSettingsClicked() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings",
-                tint = Color.White // White icon on violet bg
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(0.5f))
-
-        // Center: Search Box (Longer)
-        Box(
-            modifier = Modifier
-                .weight(4f)
-                .height(40.dp)
+                .fillMaxWidth()
+                .height(44.dp) // Perfect touch target size
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
@@ -99,7 +75,7 @@ fun GalleryXHomeTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -114,7 +90,7 @@ fun GalleryXHomeTopBar(
                         Text(
                             text = placeholderText,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            fontSize = 14.sp,
+                            fontSize = 15.sp,
                             maxLines = 1
                         )
                     }
@@ -123,7 +99,7 @@ fun GalleryXHomeTopBar(
                         onValueChange = onQueryChanged,
                         textStyle = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 14.sp
+                            fontSize = 15.sp
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = true,
@@ -132,18 +108,6 @@ fun GalleryXHomeTopBar(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(0.5f))
-
-        // Right: App Icon (Clickable -> GitHub)
-        Image(
-            painter = painterResource(id = R.drawable.ic_gallery_x),
-            contentDescription = "App Icon",
-            modifier = Modifier
-                .size(40.dp)
-                .padding(start = 8.dp)
-                .clickable { onLogoClicked() }
-        )
     }
 }
 

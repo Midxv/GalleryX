@@ -40,14 +40,24 @@ class MainViewModel @Inject constructor(
     private val sharedUrisStore: SharedUrisStore,
 ) : ObservableViewModel(app) {
 
-    // CHANGED: Default ID to albumsFragment
-    private val _mainMenuUiState = MutableStateFlow(MainMenuUiState(R.id.albumsFragment))
+    private val _mainMenuUiState = MutableStateFlow(MainMenuUiState(R.id.galleryFragment))
     val mainMenuUiState = _mainMenuUiState.asStateFlow()
 
+    // NEW: Track if the bottom bar should be visible to fix the lockscreen bug
+    private val _showBottomNav = MutableStateFlow(false)
+    val showBottomNav = _showBottomNav.asStateFlow()
 
     fun addUriToSharedUriStore(uri: Uri) = sharedUrisStore.safeAddUri(uri)
 
     fun onDestinationChanged(id: Int) {
         _mainMenuUiState.update { it.copy(currentFragmentId = id) }
+
+        // Show the nav bar ONLY on the main dashboard screens
+        _showBottomNav.value = id in listOf(
+            R.id.galleryFragment,
+            R.id.albumsFragment,
+            R.id.settingsFragment,
+            R.id.albumDetailFragment
+        )
     }
 }

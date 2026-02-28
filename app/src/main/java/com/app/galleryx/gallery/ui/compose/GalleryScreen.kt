@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.galleryx.gallery.ui.GalleryViewModel
 import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
@@ -51,18 +52,20 @@ fun GalleryScreen(
                     onQueryChanged = { newQuery: String ->
                         searchQuery = newQuery
                         // TODO: Pass query to viewModel if filtering is implemented
-                        // viewModel.onSearchQueryChanged(newQuery)
                     },
                     onSettingsClicked = onSettingsClicked,
-                    // FIXED: Added onLogoClicked parameter
                     onLogoClicked = {
                         uriHandler.openUri("https://github.com/midxv/galleryx")
                     },
-                    placeholderText = "Search photos..."
+                    placeholderText = "Search files..."
                 )
             }
         ) { contentPadding ->
-            val modifier = Modifier.padding(top = contentPadding.calculateTopPadding())
+            // Added 90.dp bottom padding so the Import button sits perfectly above the Glass Nav Bar
+            val modifier = Modifier.padding(
+                top = contentPadding.calculateTopPadding(),
+                bottom = 90.dp
+            )
 
             when (val state = uiState) {
                 is com.app.galleryx.gallery.ui.GalleryUiState.Empty -> GalleryPlaceholder(

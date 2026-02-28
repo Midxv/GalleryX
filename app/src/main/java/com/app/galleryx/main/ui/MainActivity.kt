@@ -23,21 +23,28 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.app.galleryx.R
 import com.app.galleryx.databinding.ActivityMainBinding
+import com.app.galleryx.main.ui.navigation.MainMenu
 import com.app.galleryx.settings.data.Config
+import com.app.galleryx.ui.theme.AppTheme
 import com.app.galleryx.uicomponnets.bindings.BindableActivity
 import javax.inject.Inject
 
 /**
  * The main Activity.
  * Holds all fragments and initializes toolbar.
- *
- * @since 1.0.0
- * @author Leon Latsch
  */
 @AndroidEntryPoint
 class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_main) {
@@ -97,13 +104,42 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-
         onOrientationChanged(newConfig.orientation)
     }
 
     override fun bind(binding: ActivityMainBinding) {
         super.bind(binding)
         binding.context = this
-        // Bottom Navigation Menu setup removed
+
+        binding.mainMenuComposeContainer.setContent {
+            val uiState by viewModel.mainMenuUiState.collectAsState()
+            val showBottomNav by viewModel.showBottomNav.collectAsState()
+
+            AppTheme {
+                AnimatedVisibility(
+                    visible = showBottomNav,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+                ) {
+                    MainMenu(
+                        uiState = uiState,
+                        onNavigationItemClicked = { fragmentId ->
+                            val navController = findNavController(R.id.mainNavHostFragment)
+                            if (navController.currentDestination?.id != fragmentId) {
+
+                                // Removed custom fading animations to ensure instant, stutter-free tab switching
+                                val navOptions = NavOptions.Builder()
+                                    .setLaunchSingleTop(true)
+                                    .setRestoreState(true)
+                                    .setPopUpTo(navController.graph.startDestinationId, false, saveState = true)
+                                    .build()
+
+                                navController.navigate(fragmentId, null, navOptions)
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }
