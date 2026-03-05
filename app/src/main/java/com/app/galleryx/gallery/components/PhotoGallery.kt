@@ -93,13 +93,11 @@ fun PhotoGallery(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Pinch to Zoom Logic
         var scale by remember { mutableFloatStateOf(1f) }
-        var columnCount by remember { mutableIntStateOf(4) } // Default 4
+        var columnCount by remember { mutableIntStateOf(4) }
 
         val transformableState = rememberTransformableState { zoomChange, _, _ ->
             scale *= zoomChange
-            // Logic to snap scale to column count (2 to 6 columns)
             if (scale > 1.2f) {
                 columnCount = max(2, columnCount - 1)
                 scale = 1f
@@ -117,16 +115,22 @@ fun PhotoGallery(
             transformableState = transformableState
         )
 
-        AnimatedVisibility(
-            visible = multiSelectionState.isActive.value.not(),
-            enter = slideInVertically { it },
-            exit = slideOutVertically { it },
-            modifier = Modifier.align(Alignment.BottomEnd)
+        // OPTIMIZED: Centered horizontally and vertically, pushed down 120.dp to sit "just below center"
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(top = 120.dp)
         ) {
-            MagicFab(
-                label = stringResource(R.string.import_menu_fab_label),
-                onClick = { importMenuBottomSheetVisible = true }
-            )
+            AnimatedVisibility(
+                visible = multiSelectionState.isActive.value.not(),
+                enter = scaleIn(), // Switched to scaleIn animation since it's floating in the middle
+                exit = scaleOut(),
+            ) {
+                MagicFab(
+                    label = stringResource(R.string.import_menu_fab_label),
+                    onClick = { importMenuBottomSheetVisible = true }
+                )
+            }
         }
 
         ImportMenuBottomSheet(
@@ -214,10 +218,8 @@ private fun PhotoGrid(
     val gridState: LazyGridState = rememberLazyGridState()
     val haptic = LocalHapticFeedback.current
 
-    // Group photos by Date
     val groupedPhotos = remember(photos) {
         photos.groupBy {
-            // Safe date formatting
             if (it.dateTaken > 0) {
                 SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(it.dateTaken))
             } else {
@@ -230,11 +232,12 @@ private fun PhotoGrid(
         columns = GridCells.Fixed(columnCount),
         modifier = modifier
             .fillMaxWidth()
-            .transformable(state = transformableState), // Attach Zoom State
-        state = gridState
+            .transformable(state = transformableState),
+        state = gridState,
+        // Kept bottom padding so user can scroll items past the floating Navigation Bar!
+        contentPadding = PaddingValues(bottom = 96.dp)
     ) {
         groupedPhotos.forEach { (dateHeader, photosInDate) ->
-            // Date Header - FIXED SPANNING
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = dateHeader,
@@ -245,7 +248,6 @@ private fun PhotoGrid(
                 )
             }
 
-            // Photos
             items(photosInDate, key = { it.uuid }) { photo ->
                 GalleryPhotoTile(
                     photoTile = photo,
@@ -276,7 +278,6 @@ private fun PhotoGrid(
     }
 }
 
-// DEFINED HERE TO FIX "Unresolved reference" ERROR
 @Composable
 fun Modifier.multiSelectionItem(selected: Boolean): Modifier {
     val animatedPadding by animateDpAsState(
@@ -338,7 +339,6 @@ private fun GalleryPhotoTile(
                 )
             }
 
-            // Using full package name to avoid ColumnScope issues if any
             androidx.compose.animation.AnimatedVisibility(
                 visible = photoTile.type.isVideo && !selected,
                 enter = scaleIn(),

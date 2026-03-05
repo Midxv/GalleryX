@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.galleryx.gallery.albums.ui.AlbumsUiEvent
 import com.app.galleryx.gallery.albums.ui.AlbumsViewModel
@@ -70,15 +69,15 @@ fun AlbumsScreen(
                 when (val state = uiState) {
                     is AlbumsUiState.Empty -> AlbumsPlaceholder(
                         handleUiEvent = { viewModel.handleUiEvent(it) },
-                        // Pushed up by 90.dp so nothing overlaps with the floating glass bar
-                        modifier = Modifier.weight(1f).padding(bottom = 90.dp)
+                        // FIX: Removed the 90.dp bottom padding to allow edge-to-edge drawing
+                        modifier = Modifier.weight(1f)
                     )
 
                     is AlbumsUiState.Content -> AlbumsContent(
                         content = state,
                         handleUiEvent = { viewModel.handleUiEvent(it) },
-                        // Pushed up by 90.dp so nothing overlaps with the floating glass bar
-                        modifier = Modifier.weight(1f).padding(bottom = 90.dp)
+                        // FIX: Removed the 90.dp bottom padding to allow edge-to-edge drawing
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

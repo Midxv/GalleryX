@@ -61,10 +61,10 @@ fun GalleryScreen(
                 )
             }
         ) { contentPadding ->
-            // Added 90.dp bottom padding so the Import button sits perfectly above the Glass Nav Bar
+            // FIX: Removed the bottom = 90.dp padding.
+            // This allows the list to scroll and draw completely edge-to-edge behind the glass navbar.
             val modifier = Modifier.padding(
-                top = contentPadding.calculateTopPadding(),
-                bottom = 90.dp
+                top = contentPadding.calculateTopPadding()
             )
 
             when (val state = uiState) {

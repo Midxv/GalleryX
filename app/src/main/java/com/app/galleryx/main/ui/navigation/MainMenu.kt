@@ -17,17 +17,22 @@
 package com.app.galleryx.main.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,52 +52,83 @@ import com.app.galleryx.ui.theme.AppTheme
 @Composable
 fun MainMenu(
     uiState: MainMenuUiState,
-    onNavigationItemClicked: (Int) -> Unit
+    onNavigationItemClicked: (Int) -> Unit,
+    onSearchClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            // LOWERED to 16.dp from 32.dp to hug the bottom edge nicely
-            .padding(bottom = 16.dp, start = 32.dp, end = 32.dp),
+            .padding(bottom = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
-            modifier = Modifier
-                .height(64.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    shape = CircleShape
-                )
-                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.Center
         ) {
-            MainNavItem(
-                id = R.id.galleryFragment,
-                iconRes = R.drawable.ic_image,
-                labelRes = R.string.gallery_all_photos_label,
-                isSelected = uiState.currentFragmentId == R.id.galleryFragment,
-                onClick = { onNavigationItemClicked(R.id.galleryFragment) }
-            )
+            // Main Navigation Pill
+            Row(
+                modifier = Modifier
+                    .height(56.dp) // PROPER PILL HEIGHT
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
+                    .padding(horizontal = 6.dp), // Outer padding
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                MainNavItem(
+                    id = R.id.galleryFragment,
+                    iconRes = R.drawable.ic_image,
+                    labelRes = R.string.gallery_all_photos_label,
+                    isSelected = uiState.currentFragmentId == R.id.galleryFragment,
+                    onClick = { onNavigationItemClicked(R.id.galleryFragment) }
+                )
 
-            MainNavItem(
-                id = R.id.albumsFragment,
-                iconRes = R.drawable.ic_folder,
-                labelRes = R.string.gallery_albums_label,
-                isSelected = uiState.currentFragmentId == R.id.albumsFragment || uiState.currentFragmentId == R.id.albumDetailFragment,
-                onClick = { onNavigationItemClicked(R.id.albumsFragment) }
-            )
+                MainNavItem(
+                    id = R.id.albumsFragment,
+                    iconRes = R.drawable.ic_folder,
+                    labelRes = R.string.gallery_albums_label,
+                    isSelected = uiState.currentFragmentId == R.id.albumsFragment || uiState.currentFragmentId == R.id.albumDetailFragment,
+                    onClick = { onNavigationItemClicked(R.id.albumsFragment) }
+                )
 
-            MainNavItem(
-                id = R.id.settingsFragment,
-                iconRes = R.drawable.ic_settings,
-                labelRes = R.string.menu_main_settings,
-                isSelected = uiState.currentFragmentId == R.id.settingsFragment,
-                onClick = { onNavigationItemClicked(R.id.settingsFragment) }
-            )
+                MainNavItem(
+                    id = R.id.settingsFragment,
+                    iconRes = R.drawable.ic_settings,
+                    labelRes = R.string.menu_main_settings,
+                    isSelected = uiState.currentFragmentId == R.id.settingsFragment,
+                    onClick = { onNavigationItemClicked(R.id.settingsFragment) }
+                )
+            }
+
+            // Space between the navbar and search icon
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Search Icon Circle
+            Box(
+                modifier = Modifier
+                    .size(56.dp) // MATCHES PILL HEIGHT
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
+                    .clickable { onSearchClicked() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -113,7 +149,8 @@ private fun MainNavItem(
             .clip(CircleShape)
             .background(backgroundColor)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .animateContentSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -142,7 +179,8 @@ private fun MainMenuPreview() {
     AppTheme {
         MainMenu(
             uiState = MainMenuUiState(R.id.galleryFragment),
-            onNavigationItemClicked = {}
+            onNavigationItemClicked = {},
+            onSearchClicked = {}
         )
     }
 }
