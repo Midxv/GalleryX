@@ -33,10 +33,11 @@ Whether you need to hide sensitive documents, personal photos, or private videos
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="Public/assets/Screenshot_2026-02-28-15-42-15-461_com.app.galleryx.foss.jpg" width="24%" />
-  <img src="Public/assets/Screenshot_2026-02-28-15-42-17-547_com.app.galleryx.foss.jpg" width="24%" />
-  <img src="Public/assets/Screenshot_2026-02-28-15-42-22-624_com.app.galleryx.foss.jpg" width="24%" />
-  <img src="Public/assets/Screenshot_2026-02-28-15-42-30-951_com.app.galleryx.foss.jpg" width="24%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-34-09-585_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-35-52-537_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-35-58-520_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-36-56-136_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-37-14-467_com.app.galleryx.foss.jpg" width="19%" />
 </p>
 
 ## 🛠️ Tech Stack & Architecture
