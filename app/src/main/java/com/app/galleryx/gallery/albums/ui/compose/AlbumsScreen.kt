@@ -31,32 +31,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.galleryx.gallery.albums.ui.AlbumsUiEvent
 import com.app.galleryx.gallery.albums.ui.AlbumsViewModel
 import com.app.galleryx.gallery.components.ImportSharedDialog
 import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
-import com.app.galleryx.main.ui.MainActivity
 import com.app.galleryx.main.ui.MainViewModel
 import com.app.galleryx.ui.theme.AppTheme
 
 @Composable
 fun AlbumsScreen(
     viewModel: AlbumsViewModel,
+    mainViewModel: MainViewModel, // <-- Directly received from Fragment
     onSettingsClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 1. Fetch the Shared MainViewModel scoped to the MainActivity
-    val activity = LocalContext.current as? MainActivity
-    val mainViewModel: MainViewModel? = activity?.let { hiltViewModel(it) }
-
-    // 2. Collect the global search visibility state
-    val isSearchVisible by mainViewModel?.isSearchVisible?.collectAsStateWithLifecycle(initialValue = false)
-        ?: mutableStateOf(false)
+    // Now this will correctly react to the Navbar clicks!
+    val isSearchVisible by mainViewModel.isSearchVisible.collectAsStateWithLifecycle()
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val uriHandler = LocalUriHandler.current
@@ -64,7 +57,6 @@ fun AlbumsScreen(
     AppTheme {
         Scaffold(
             topBar = {
-                // 3. Beautifully animate the TopBar sliding down when the user clicks the Navbar search icon
                 AnimatedVisibility(
                     visible = isSearchVisible,
                     enter = expandVertically() + fadeIn(),

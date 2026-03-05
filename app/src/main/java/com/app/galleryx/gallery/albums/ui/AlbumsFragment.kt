@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels // NEW
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
@@ -32,6 +33,7 @@ import com.app.galleryx.gallery.albums.ui.compose.AlbumsScreen
 import com.app.galleryx.gallery.albums.ui.navigation.AlbumsNavigator
 import com.app.galleryx.imageloading.compose.LocalEncryptedImageLoader
 import com.app.galleryx.imageloading.di.EncryptedImageLoader
+import com.app.galleryx.main.ui.MainViewModel // NEW
 import com.app.galleryx.news.newfeatures.ui.ShowNewsDialogUseCase
 import com.app.galleryx.other.extensions.finishOnBackWhileStarted
 import com.app.galleryx.other.extensions.launchLifecycleAwareJob
@@ -47,6 +49,7 @@ class AlbumsFragment : Fragment() {
     lateinit var albumsNavigator: AlbumsNavigator
 
     private val viewModel: AlbumsViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels() // <-- Grabs the Activity's ViewModel
 
     @EncryptedImageLoader
     @Inject
@@ -70,6 +73,7 @@ class AlbumsFragment : Fragment() {
             ) {
                 AlbumsScreen(
                     viewModel = viewModel,
+                    mainViewModel = mainViewModel, // <-- Pass it to Compose
                     onSettingsClicked = {
                         findNavController().navigate(R.id.settingsFragment)
                     }

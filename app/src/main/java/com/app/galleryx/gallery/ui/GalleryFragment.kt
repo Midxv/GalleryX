@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels // NEW
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
@@ -34,6 +35,7 @@ import com.app.galleryx.gallery.ui.navigation.GalleryNavigator
 import com.app.galleryx.gallery.ui.navigation.PhotoActionsNavigator
 import com.app.galleryx.imageloading.compose.LocalEncryptedImageLoader
 import com.app.galleryx.imageloading.di.EncryptedImageLoader
+import com.app.galleryx.main.ui.MainViewModel // NEW
 import com.app.galleryx.other.extensions.launchLifecycleAwareJob
 import com.app.galleryx.settings.data.Config
 import com.app.galleryx.settings.ui.compose.LocalConfig
@@ -44,6 +46,7 @@ import javax.inject.Inject
 class GalleryFragment : Fragment() {
 
     private val viewModel: GalleryViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels() // <-- Grabs the Activity's ViewModel
 
     @Inject
     lateinit var galleryNavigator: GalleryNavigator
@@ -72,6 +75,7 @@ class GalleryFragment : Fragment() {
                     ) {
                         GalleryScreen(
                             viewModel = viewModel,
+                            mainViewModel = mainViewModel, // <-- Pass it to Compose
                             onSettingsClicked = {
                                 findNavController().navigate(R.id.settingsFragment)
                             }

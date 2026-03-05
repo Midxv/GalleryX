@@ -29,41 +29,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.galleryx.gallery.ui.GalleryViewModel
 import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
-import com.app.galleryx.main.ui.MainActivity
 import com.app.galleryx.main.ui.MainViewModel
 import com.app.galleryx.ui.theme.AppTheme
 
 @Composable
 fun GalleryScreen(
     viewModel: GalleryViewModel,
+    mainViewModel: MainViewModel, // <-- Directly received from Fragment
     onSettingsClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 1. Fetch the Shared MainViewModel scoped to the MainActivity
-    val activity = LocalContext.current as? MainActivity
-    val mainViewModel: MainViewModel? = activity?.let { hiltViewModel(it) }
+    // Now this will correctly react to the Navbar clicks!
+    val isSearchVisible by mainViewModel.isSearchVisible.collectAsStateWithLifecycle()
 
-    // 2. Collect the global search visibility state
-    val isSearchVisible by mainViewModel?.isSearchVisible?.collectAsStateWithLifecycle(initialValue = false)
-        ?: mutableStateOf(false)
-
-    // State for the search query
     var searchQuery by rememberSaveable { mutableStateOf("") }
-
-    // Handler to open URLs
     val uriHandler = LocalUriHandler.current
 
     AppTheme {
         Scaffold(
             topBar = {
-                // 3. Beautifully animate the TopBar sliding down when the user clicks the Navbar search icon
                 AnimatedVisibility(
                     visible = isSearchVisible,
                     enter = expandVertically() + fadeIn(),
@@ -73,7 +62,6 @@ fun GalleryScreen(
                         query = searchQuery,
                         onQueryChanged = { newQuery: String ->
                             searchQuery = newQuery
-                            // TODO: Pass query to viewModel if filtering is implemented
                         },
                         onSettingsClicked = onSettingsClicked,
                         onLogoClicked = {
@@ -84,7 +72,6 @@ fun GalleryScreen(
                 }
             }
         ) { contentPadding ->
-            // This allows the list to scroll and draw completely edge-to-edge behind the glass navbar.
             val modifier = Modifier.padding(
                 top = contentPadding.calculateTopPadding()
             )
