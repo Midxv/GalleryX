@@ -48,12 +48,12 @@ fun AlbumsContent(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // FIXED: Anchored strictly to the bottom center. Constant location above the floating navbar!
+        // FIXED: Anchored to the bottom-left!
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding() // Respect system insets like the navbar
-                .padding(bottom = 96.dp) // Pushes it exactly 16dp above your floating navbar
+                .align(Alignment.BottomEnd) // <-- Shifted left
+                .navigationBarsPadding()
+                .padding(start = 24.dp, bottom = 96.dp) // Added start padding
         ) {
             MagicFab(
                 label = stringResource(R.string.magic_fab_new_album_label),

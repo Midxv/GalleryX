@@ -24,8 +24,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -115,12 +113,12 @@ fun PhotoGallery(
             transformableState = transformableState
         )
 
-        // FIXED: Anchored strictly to the bottom center. Will never jump around regardless of list emptiness.
+        // FIXED: Anchored to the bottom-left!
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding() // Respect system insets like the navbar
-                .padding(bottom = 96.dp) // Pushes it exactly 16dp above your floating navbar
+                .align(Alignment.BottomStart) // <-- Shifted left
+                .navigationBarsPadding()
+                .padding(start = 24.dp, bottom = 96.dp) // Added start padding, kept height identical
         ) {
             AnimatedVisibility(
                 visible = multiSelectionState.isActive.value.not(),
@@ -235,7 +233,6 @@ private fun PhotoGrid(
             .fillMaxWidth()
             .transformable(state = transformableState),
         state = gridState,
-        // Increased bottom padding so user can scroll items completely past the floating Navbar!
         contentPadding = PaddingValues(bottom = 140.dp)
     ) {
         groupedPhotos.forEach { (dateHeader, photosInDate) ->
@@ -347,7 +344,7 @@ private fun GalleryPhotoTile(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(20.dp)
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.BottomEnd)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_videocam),

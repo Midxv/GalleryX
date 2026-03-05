@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020–2026 Leon Latsch
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.app.galleryx.gallery.ui.compose
 
 import androidx.compose.foundation.Image
@@ -57,12 +73,12 @@ fun GalleryPlaceholder(
             )
         }
 
-        // FIXED: Anchored to bottom, matches PhotoGallery logic!
+        // FIXED: Anchored to the bottom-left!
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomEnd) // <-- Shifted left
                 .navigationBarsPadding()
-                .padding(bottom = 96.dp)
+                .padding(start = 24.dp, bottom = 96.dp) // Added start padding
         ) {
             MagicFab(
                 label = stringResource(R.string.import_menu_fab_label),
@@ -81,6 +97,16 @@ fun GalleryPlaceholder(
             onImportChoice = {
                 handleUiEvent(GalleryUiEvent.OnImportChoice(it))
             }
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
+@Composable
+private fun GalleryPlaceholderPreview() {
+    AppTheme {
+        GalleryPlaceholder(
+            handleUiEvent = {}
         )
     }
 }
