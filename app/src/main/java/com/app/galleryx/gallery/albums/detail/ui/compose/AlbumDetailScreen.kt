@@ -27,9 +27,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,8 +71,8 @@ fun AlbumDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // CHANGED: Use pinnedScrollBehavior for a fixed, smaller TopAppBar
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    // CHANGED: Restored exitUntilCollapsedScrollBehavior to match Settings Screen!
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -80,16 +81,19 @@ fun AlbumDetailScreen(
 
     AppTheme {
         Scaffold(
+            // Nested scroll connection must be on the Scaffold so the LargeTopAppBar knows to collapse
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 var showMore by remember { mutableStateOf(false) }
 
-                // CHANGED: Replaced LargeTopAppBar with standard TopAppBar for smaller height
-                TopAppBar(
+                // CHANGED: Restored LargeTopAppBar for consistent styling
+                LargeTopAppBar(
                     title = {
                         Text(
                             text = uiState.albumName,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            fontWeight = FontWeight.Bold // Added bold weight
                         )
                     },
                     navigationIcon = {
@@ -108,7 +112,7 @@ fun AlbumDetailScreen(
                             onQueryChanged = { query: String -> viewModel.onSearchQueryChanged(query) },
                             placeholderText = "Search...",
                             modifier = Modifier
-                                .width(200.dp) // Adjusted width slightly for the smaller bar
+                                .width(200.dp)
                                 .padding(end = 4.dp)
                         )
 
@@ -185,9 +189,7 @@ fun AlbumDetailScreen(
                         itemsToMove = items
                         showMoveToAlbumDialog = true
                     },
-                    modifier = Modifier
-                        .nestedScroll(scrollBehavior.nestedScrollConnection)
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
                 )
             }
 
