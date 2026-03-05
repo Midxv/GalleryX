@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,6 +67,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -215,6 +219,7 @@ fun SettingsContent(
 ) {
     val fragment = LocalFragment.current
     val navController = fragment?.findNavController()
+    val uriHandler = LocalUriHandler.current
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -305,8 +310,62 @@ fun SettingsContent(
                         }
                     }
                 }
+
+                // NEW DEV & COPYRIGHT FOOTER
+                SettingsFooter(uriHandler)
             }
         }
+    }
+}
+
+@Composable
+fun SettingsFooter(uriHandler: UriHandler) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Redirection Buttons
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilledTonalButton(
+                onClick = { uriHandler.openUri("https://github.com/midxv/galleryx/releases") },
+                shape = CircleShape
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_code),
+                    contentDescription = "Releases",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Releases", fontWeight = FontWeight.SemiBold)
+            }
+
+            FilledTonalButton(
+                onClick = { uriHandler.openUri("https://github.com/Midxv") },
+                shape = CircleShape
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_person),
+                    contentDescription = "Author",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("Author", fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        // Copyright Info
+        Text(
+            text = "© 2026 Asif Middya • GalleryX",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
