@@ -9,8 +9,6 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -234,8 +232,8 @@ private fun PhotoGrid(
             .fillMaxWidth()
             .transformable(state = transformableState),
         state = gridState,
-        // Kept bottom padding so user can scroll items past the floating Navigation Bar!
-        contentPadding = PaddingValues(bottom = 96.dp)
+        // Increased bottom padding so user can scroll items completely past the floating Navbar!
+        contentPadding = PaddingValues(bottom = 140.dp)
     ) {
         groupedPhotos.forEach { (dateHeader, photosInDate) ->
             item(span = { GridItemSpan(maxLineSpan) }) {

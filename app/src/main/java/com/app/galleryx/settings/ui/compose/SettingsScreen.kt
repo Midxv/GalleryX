@@ -20,6 +20,7 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,9 +31,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,7 +70,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
@@ -130,9 +132,6 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
         viewModel.registerPreferenceCallback(Config.SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED) {
             viewModel.onBiometricUnlockChanged(it, fragment)
         }
-
-        // REMOVED: Secret Launch Code callback
-        // REMOVED: Hide App callback
 
         viewModel.registerPreferenceCallback(SettingsFragment.KEY_ACTION_RESET) {
             CheckPasswordDialog {
@@ -208,7 +207,6 @@ fun SettingsScreen() {
     SettingsCallbacks(viewModel)
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsContent(
@@ -225,10 +223,10 @@ fun SettingsContent(
                 LargeTopAppBar(
                     title = {
                         Text(
-                            text = stringResource(R.string.settings_title)
+                            text = stringResource(R.string.settings_title),
+                            fontWeight = FontWeight.Bold
                         )
                     },
-                    // Added Navigation Icon (Back Arrow)
                     navigationIcon = {
                         if (navController != null) {
                             IconButton(onClick = { navController.navigateUp() }) {
@@ -240,30 +238,29 @@ fun SettingsContent(
                         }
                     },
                     scrollBehavior = scrollBehavior,
-                    windowInsets = WindowInsets.statusBars // Respect Notch
+                    windowInsets = WindowInsets.statusBars
                 )
             },
-            // Added modifier to respect nested scroll
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
         ) { contentPadding ->
             Column(
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(contentPadding)
+                    .padding(bottom = 140.dp, top = 8.dp) // Bottom padding for navbar
             ) {
                 for (section in screenConfig.sections) {
-                    val isLast = section == screenConfig.sections.last()
+                    PreferenceSectionView(section = section) {
 
-                    PreferenceSectionView(
-                        section = section,
-                    ) {
-                        for (preference in section.preferences) {
-                            // FILTER OUT HIDDEN ITEMS
-                            if (preference.key == SettingsFragment.KEY_ACTION_HIDE_APP ||
-                                preference.key == Config.SECURITY_DIAL_LAUNCH_CODE) {
-                                continue
-                            }
+                        // Filter out hidden preferences
+                        val visiblePreferences = section.preferences.filter {
+                            it.key != SettingsFragment.KEY_ACTION_HIDE_APP &&
+                                    it.key != Config.SECURITY_DIAL_LAUNCH_CODE
+                        }
+
+                        visiblePreferences.forEachIndexed { index, preference ->
+                            val isLast = index == visiblePreferences.lastIndex
 
                             when (preference) {
                                 is Preference.Simple -> {
@@ -271,6 +268,7 @@ fun SettingsContent(
                                         icon = painterResource(preference.icon),
                                         title = stringResource(preference.title),
                                         summary = stringResource(preference.summary),
+                                        showChevron = true, // iOS style navigation arrow
                                         onClick = {
                                             fragment ?: return@PreferenceView
                                             handleUiEvent(SettingsUiEvent.OnPreferenceClick(preference, null))
@@ -296,11 +294,15 @@ fun SettingsContent(
                                     )
                                 }
                             }
-                        }
-                    }
 
-                    if (!isLast) {
-                        HorizontalDivider()
+                            // iOS Style Indented Divider
+                            if (!isLast) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(start = 56.dp),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -315,33 +317,36 @@ fun PreferenceSectionView(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(horizontal = 16.dp),
     ) {
+        // Section Header (Small, capitalized, sitting above the card)
         Text(
-            text = stringResource(section.title),
+            text = stringResource(section.title).uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .padding(
-                    horizontal = 60.dp
-                )
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
         )
 
+        // The iOS-style rounded card holding the items
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+        ) {
+            content()
+        }
+
+        // Section Summary (Sitting below the card)
         if (section.summary != null) {
             Text(
                 text = stringResource(section.summary),
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(
-                        horizontal = 60.dp
-                    )
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp)
             )
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        content()
     }
 }
 
@@ -363,6 +368,7 @@ fun <T : SettingsEnum> PreferenceEnumView(
         icon = painterResource(preference.icon),
         title = stringResource(preference.title),
         summary = stringResource(value.label),
+        showChevron = true,
         onClick = { showDialog = true },
         modifier = modifier,
     )
@@ -390,11 +396,12 @@ fun <T : SettingsEnum> PreferenceEnumView(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(8.dp))
                                 .clickable {
                                     showDialog = false
                                     onItemSelected(v)
                                 }
+                                .padding(vertical = 4.dp, horizontal = 8.dp)
                         ) {
                             RadioButton(
                                 selected = value == v,
@@ -454,46 +461,58 @@ fun PreferenceView(
     summary: String,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    showChevron: Boolean = false,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
+            .fillMaxWidth()
             .clickable(enabled = onClick != null) {
                 onClick?.invoke()
             }
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 12.dp,
-            )
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Icon(
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp)
         )
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = title,
                 fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
-                text = summary,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+            if (summary.isNotEmpty()) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
 
         if (trailing != null) {
             trailing()
+        } else if (showChevron && onClick != null) {
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
-
 }
 
 @PreviewLightDark

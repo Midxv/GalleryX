@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,6 +59,7 @@ fun MainMenu(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding() // Pushes the nav bar above system gesture/button bar
             .padding(bottom = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
