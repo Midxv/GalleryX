@@ -43,16 +43,31 @@ class MainViewModel @Inject constructor(
     private val _mainMenuUiState = MutableStateFlow(MainMenuUiState(R.id.galleryFragment))
     val mainMenuUiState = _mainMenuUiState.asStateFlow()
 
-    // NEW: Track if the bottom bar should be visible to fix the lockscreen bug
+    // Track if the bottom bar should be visible to fix the lockscreen bug
     private val _showBottomNav = MutableStateFlow(false)
     val showBottomNav = _showBottomNav.asStateFlow()
+
+    // Global search visibility toggle controlled by the bottom navbar
+    private val _isSearchVisible = MutableStateFlow(false)
+    val isSearchVisible = _isSearchVisible.asStateFlow()
+
+    fun toggleSearchVisibility() {
+        _isSearchVisible.value = !_isSearchVisible.value
+    }
+
+    fun hideSearch() {
+        _isSearchVisible.value = false
+    }
 
     fun addUriToSharedUriStore(uri: Uri) = sharedUrisStore.safeAddUri(uri)
 
     fun onDestinationChanged(id: Int) {
         _mainMenuUiState.update { it.copy(currentFragmentId = id) }
 
-        // Show the nav bar ONLY on the main dashboard screens (Hidden inside albums now)
+        // Always hide the search bar automatically when the user switches tabs
+        hideSearch()
+
+        // Show the nav bar ONLY on the main dashboard screens (Hidden inside inner albums/viewers)
         _showBottomNav.value = id in listOf(
             R.id.galleryFragment,
             R.id.albumsFragment,

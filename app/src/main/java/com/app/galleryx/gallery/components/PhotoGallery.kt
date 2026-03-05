@@ -9,6 +9,8 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -113,15 +115,16 @@ fun PhotoGallery(
             transformableState = transformableState
         )
 
-        // OPTIMIZED: Centered horizontally and vertically, pushed down 120.dp to sit "just below center"
+        // FIXED: Anchored strictly to the bottom center. Will never jump around regardless of list emptiness.
         Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(top = 120.dp)
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding() // Respect system insets like the navbar
+                .padding(bottom = 96.dp) // Pushes it exactly 16dp above your floating navbar
         ) {
             AnimatedVisibility(
                 visible = multiSelectionState.isActive.value.not(),
-                enter = scaleIn(), // Switched to scaleIn animation since it's floating in the middle
+                enter = scaleIn(),
                 exit = scaleOut(),
             ) {
                 MagicFab(

@@ -19,6 +19,7 @@ package com.app.galleryx.gallery.albums.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,11 +48,12 @@ fun AlbumsContent(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // OPTIMIZED: Centered horizontally and vertically, pushed down 120.dp to sit "just below center"
+        // FIXED: Anchored strictly to the bottom center. Constant location above the floating navbar!
         Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(top = 120.dp)
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding() // Respect system insets like the navbar
+                .padding(bottom = 96.dp) // Pushes it exactly 16dp above your floating navbar
         ) {
             MagicFab(
                 label = stringResource(R.string.magic_fab_new_album_label),

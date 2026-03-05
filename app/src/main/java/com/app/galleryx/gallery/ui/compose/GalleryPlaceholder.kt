@@ -1,19 +1,3 @@
-/*
- *   Copyright 2020–2026 Leon Latsch
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- */
-
 package com.app.galleryx.gallery.ui.compose
 
 import androidx.compose.foundation.Image
@@ -21,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,12 +57,20 @@ fun GalleryPlaceholder(
             )
         }
 
-        MagicFab(
-            label = stringResource(R.string.import_menu_fab_label),
-            onClick = {
-                importMenuBottomSheetVisible = true
-            }
-        )
+        // FIXED: Anchored to bottom, matches PhotoGallery logic!
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 96.dp)
+        ) {
+            MagicFab(
+                label = stringResource(R.string.import_menu_fab_label),
+                onClick = {
+                    importMenuBottomSheetVisible = true
+                }
+            )
+        }
 
         ImportMenuBottomSheet(
             open = importMenuBottomSheetVisible,
@@ -88,16 +81,6 @@ fun GalleryPlaceholder(
             onImportChoice = {
                 handleUiEvent(GalleryUiEvent.OnImportChoice(it))
             }
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
-@Composable
-private fun GalleryPlaceholderPreview() {
-    AppTheme {
-        GalleryPlaceholder(
-            handleUiEvent = {}
         )
     }
 }

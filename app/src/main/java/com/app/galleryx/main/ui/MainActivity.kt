@@ -136,6 +136,10 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
 
                                 navController.navigate(fragmentId, null, navOptions)
                             }
+                        },
+                        onSearchClicked = {
+                            // CONNECTED TO MAIN VIEW MODEL
+                            viewModel.toggleSearchVisibility()
                         }
                     )
                 }
