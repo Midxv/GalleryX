@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.settings.data
@@ -28,7 +28,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-
 
 /**
  * Manages reading and writing with the config file.
@@ -86,6 +85,13 @@ class Config(context: Context) {
     var galleryAutoFullscreen: Boolean
         get() = getBoolean(GALLERY_AUTO_FULLSCREEN, GALLERY_AUTO_FULLSCREEN_DEFAULT)
         set(value) = putBoolean(GALLERY_AUTO_FULLSCREEN, value)
+
+    /**
+     * Determines if album covers should be replaced by a static folder icon for privacy.
+     */
+    var galleryStaticAlbumCover: Boolean
+        get() = getBoolean(GALLERY_STATIC_ALBUM_COVER, GALLERY_STATIC_ALBUM_COVER_DEFAULT)
+        set(value) = putBoolean(GALLERY_STATIC_ALBUM_COVER, value)
 
     /**
      * Determines the start page of the gallery.
@@ -191,7 +197,6 @@ class Config(context: Context) {
         }
     }
 
-
     // endregion
 
     // Single source of truth for config keys and defaults. Always use these constants
@@ -217,6 +222,9 @@ class Config(context: Context) {
 
         const val GALLERY_AUTO_FULLSCREEN = "gallery^fullscreen.auto"
         const val GALLERY_AUTO_FULLSCREEN_DEFAULT = true
+
+        const val GALLERY_STATIC_ALBUM_COVER = "gallery^staticAlbumCover"
+        const val GALLERY_STATIC_ALBUM_COVER_DEFAULT = false
 
         const val GALLERY_START_PAGE = "gallery^startPage"
         val GALLERY_START_PAGE_DEFAULT = StartPage.AllFiles

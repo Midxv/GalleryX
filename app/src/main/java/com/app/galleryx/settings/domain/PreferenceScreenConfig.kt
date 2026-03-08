@@ -22,6 +22,8 @@ import com.app.galleryx.R
 import com.app.galleryx.settings.data.Config
 import com.app.galleryx.settings.data.Config.Companion.GALLERY_AUTO_FULLSCREEN
 import com.app.galleryx.settings.data.Config.Companion.GALLERY_AUTO_FULLSCREEN_DEFAULT
+import com.app.galleryx.settings.data.Config.Companion.GALLERY_START_PAGE
+import com.app.galleryx.settings.data.Config.Companion.GALLERY_START_PAGE_DEFAULT
 import com.app.galleryx.settings.data.Config.Companion.SECURITY_ALLOW_SCREENSHOTS
 import com.app.galleryx.settings.data.Config.Companion.SECURITY_ALLOW_SCREENSHOTS_DEFAULT
 import com.app.galleryx.settings.data.Config.Companion.SECURITY_BIOMETRIC_AUTHENTICATION_ENABLED
@@ -30,6 +32,7 @@ import com.app.galleryx.settings.data.Config.Companion.SYSTEM_DESIGN
 import com.app.galleryx.settings.data.Config.Companion.SYSTEM_DESIGN_DEFAULT
 import com.app.galleryx.settings.domain.models.LockTimeout
 import com.app.galleryx.settings.domain.models.SettingsEnum
+import com.app.galleryx.settings.domain.models.StartPage
 import com.app.galleryx.settings.domain.models.SystemDesignEnum
 import com.app.galleryx.settings.ui.SettingsFragment
 
@@ -90,14 +93,27 @@ val PreferenceScreenConfigContent = listOf<PreferenceSection>(
         title = R.string.settings_category_gallery,
         summary = null,
         preferences = listOf(
+            Preference.Enum(
+                key = GALLERY_START_PAGE,
+                icon = R.drawable.ic_image,
+                title = R.string.settings_gallery_start_page_title,
+                default = GALLERY_START_PAGE_DEFAULT,
+                possibleValues = StartPage.entries,
+            ),
             Preference.Switch(
                 key = GALLERY_AUTO_FULLSCREEN,
                 icon = R.drawable.ic_fullscreen,
                 title = R.string.settings_gallery_auto_fullscreen_title,
                 summary = R.string.settings_gallery_auto_fullscreen_summary,
                 default = GALLERY_AUTO_FULLSCREEN_DEFAULT,
+            ),
+            Preference.Switch(
+                key = Config.GALLERY_STATIC_ALBUM_COVER,
+                icon = R.drawable.ic_folder,
+                title = R.string.settings_gallery_static_album_cover_title,
+                summary = R.string.settings_gallery_static_album_cover_summary,
+                default = Config.GALLERY_STATIC_ALBUM_COVER_DEFAULT,
             )
-            // REMOVED: GALLERY_START_PAGE Enum preference
         )
     ),
     PreferenceSection(
@@ -178,5 +194,4 @@ val PreferenceScreenConfigContent = listOf<PreferenceSection>(
             ),
         ),
     )
-    // REMOVED: PreferenceSection "Other" (Feedback, Donate, Credits, etc.)
 )

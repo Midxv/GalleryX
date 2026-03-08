@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -59,7 +58,6 @@ fun MainMenu(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding() // Pushes the nav bar above system gesture/button bar
             .padding(bottom = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
@@ -70,7 +68,7 @@ fun MainMenu(
             // Main Navigation Pill
             Row(
                 modifier = Modifier
-                    .height(56.dp) // PROPER PILL HEIGHT
+                    .height(56.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
                     .border(
@@ -78,7 +76,7 @@ fun MainMenu(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                         shape = CircleShape
                     )
-                    .padding(horizontal = 6.dp), // Outer padding
+                    .padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -107,29 +105,33 @@ fun MainMenu(
                 )
             }
 
-            // Space between the navbar and search icon
-            Spacer(modifier = Modifier.width(12.dp))
+            // Animate out the search button if we are on the Settings Screen
+            AnimatedVisibility(visible = uiState.currentFragmentId != R.id.settingsFragment) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.width(12.dp))
 
-            // Search Icon Circle
-            Box(
-                modifier = Modifier
-                    .size(56.dp) // MATCHES PILL HEIGHT
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                        shape = CircleShape
-                    )
-                    .clickable { onSearchClicked() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Search,
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
-                )
+                    // Search Icon Circle
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                shape = CircleShape
+                            )
+                            .clickable { onSearchClicked() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
             }
         }
     }

@@ -297,6 +297,8 @@
     <string name="sorting_field_import_date_label">Import date</string>
     <string name="sorting_field_filename_label">Filename</string>
     <string name="sorting_field_size_label">File size</string>
+    <string name="settings_gallery_static_album_cover_title">Static Album Covers</string>
+    <string name="settings_gallery_static_album_cover_summary">Replaces album image thumbnails with a static folder icon for extra privacy</string>
     <string name="sorting_field_added_to_album_label">Added to album</string>
     <string name="sorting_field_last_modified">Last modified</string>
 

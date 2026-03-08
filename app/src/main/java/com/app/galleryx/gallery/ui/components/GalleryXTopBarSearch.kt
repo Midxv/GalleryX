@@ -32,9 +32,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -42,32 +46,38 @@ import androidx.compose.ui.unit.sp
 
 /**
  * The Top Bar for the Home Screen.
- * Now a full-width clean search bar just below the status bar/notch.
  */
 @Composable
 fun GalleryXHomeTopBar(
     query: String,
     onQueryChanged: (String) -> Unit,
-    @Suppress("UNUSED_PARAMETER") onSettingsClicked: () -> Unit, // Kept to prevent compiler crash
-    @Suppress("UNUSED_PARAMETER") onLogoClicked: () -> Unit,     // Kept to prevent compiler crash
+    @Suppress("UNUSED_PARAMETER") onSettingsClicked: () -> Unit,
+    @Suppress("UNUSED_PARAMETER") onLogoClicked: () -> Unit,
     placeholderText: String = "Search...",
     modifier: Modifier = Modifier
 ) {
+    // 1. Create a FocusRequester to open the keyboard automatically
+    val focusRequester = remember { FocusRequester() }
+
+    // 2. Request focus when this composable enters the screen
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding() // Hugs the notch perfectly
+            .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // Full Width Search Box
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp) // Perfect touch target size
+                .height(44.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
@@ -82,7 +92,9 @@ fun GalleryXHomeTopBar(
                     painter = painterResource(id = android.R.drawable.ic_menu_search),
                     contentDescription = "Search",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp).padding(end = 8.dp)
+                    modifier = Modifier
+                        .size(20.dp)
+                        .padding(end = 8.dp)
                 )
 
                 Box(modifier = Modifier.weight(1f)) {
@@ -103,7 +115,10 @@ fun GalleryXHomeTopBar(
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        // 3. Attach the FocusRequester to the TextField
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
                     )
                 }
             }
@@ -121,6 +136,12 @@ fun GalleryXActionSearchBar(
     placeholderText: String = "Search...",
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Box(
         modifier = modifier
             .height(36.dp)
@@ -138,7 +159,9 @@ fun GalleryXActionSearchBar(
                 painter = painterResource(id = android.R.drawable.ic_menu_search),
                 contentDescription = "Search",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp).padding(end = 6.dp)
+                modifier = Modifier
+                    .size(18.dp)
+                    .padding(end = 6.dp)
             )
 
             Box(modifier = Modifier.weight(1f)) {
@@ -159,7 +182,9 @@ fun GalleryXActionSearchBar(
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
                 )
             }
         }

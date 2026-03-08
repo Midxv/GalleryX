@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.gallery.components
@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -47,13 +48,19 @@ import com.app.galleryx.R
 import com.app.galleryx.gallery.albums.ui.compose.AlbumItem
 import com.app.galleryx.imageloading.compose.model.EncryptedImageRequestData
 import com.app.galleryx.imageloading.compose.rememberEncryptedImagePainter
+import com.app.galleryx.settings.data.Config
 
 @Composable
 fun AlbumTile(
     album: AlbumItem,
     onAlbumClicked: (String) -> Unit,
     modifier: Modifier = Modifier,
-    ) {
+) {
+    // Dynamically retrieve the config setting to check if static covers are enabled
+    val context = LocalContext.current
+    val config = remember { Config(context) }
+    val useStaticCover = config.galleryStaticAlbumCover
+
     Card(
         modifier = modifier
             .padding(12.dp)
@@ -64,7 +71,8 @@ fun AlbumTile(
                 .fillMaxSize()
                 .aspectRatio(1f)
 
-            if (album.albumCover == null || LocalInspectionMode.current) {
+            // Show standard folder icon if there is no image, if in preview mode, or if the new Privacy Setting is turned ON.
+            if (album.albumCover == null || LocalInspectionMode.current || useStaticCover) {
                 Box(
                     modifier = contentModifier.background(MaterialTheme.colorScheme.outline)
                 ) {
