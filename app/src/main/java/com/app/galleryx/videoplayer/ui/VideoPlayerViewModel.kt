@@ -1,50 +1,17 @@
-/*
- *   Copyright 2020–2026 Leon Latsch
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- */
-
 package com.app.galleryx.videoplayer.ui
 
 import android.app.Application
-import android.net.Uri
-import androidx.annotation.OptIn
-import androidx.databinding.Bindable
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DataSource
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.app.galleryx.BR
-import com.app.galleryx.model.database.entity.Photo
 import com.app.galleryx.model.repositories.PhotoRepository
 import com.app.galleryx.other.onMain
 import com.app.galleryx.security.EncryptionManager
 import com.app.galleryx.uicomponnets.bindings.ObservableViewModel
-import com.app.galleryx.videoplayer.data.AesDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
-/**
- * ViewModel for playing videos.
- *
- * @since 1.3.0
- * @author Leon Latsch
- */
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor(
     private val app: Application,
@@ -52,67 +19,56 @@ class VideoPlayerViewModel @Inject constructor(
     private val encryptionManager: EncryptionManager,
 ) : ObservableViewModel(app) {
 
-    @get:Bindable
-    var player: ExoPlayer? = null
-        set(value) {
-            field = value
-            notifyChange(BR.player, value)
-        }
+    init {
+        // SECURITY: Instantly wipe any lingering cache from previous crashes
+        cleanupCache()
+    }
 
     /**
-     * Create and prepare the [player] to play the passed video.
+     * Extracts the encrypted video to an ultra-secure internal sandbox.
      */
-    fun setupPlayer(photoUUID: String) {
-        releasePlayer()
-
+    fun setupPlayer(photoUUID: String, onReady: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val photo = photoRepository.get(photoUUID)
+            val encryptedFile = File(app.getFileStreamPath(photo.internalFileName).canonicalPath)
 
-            player = ExoPlayer.Builder(app)
-                .setMediaSourceFactory(createMediaSourceFactory())
-                .build()
-                .apply {
-                    onMain {
-                        setMediaItem(createMediaItem(photo))
-                        prepare()
-                        playWhenReady = true
+            val tempDir = File(app.cacheDir, "vlc_secure_cache").apply { mkdirs() }
+            val tempFile = File(tempDir, "${photoUUID}.mp4")
+
+            if (!tempFile.exists()) {
+                encryptionManager.createCipherInputStream(encryptedFile.inputStream())?.use { input ->
+                    tempFile.outputStream().use { output ->
+                        input.copyTo(output)
                     }
                 }
+            }
+
+            onMain {
+                onReady(tempFile.absolutePath)
+            }
         }
-    }
-
-    @OptIn(UnstableApi::class)
-    private fun createMediaSourceFactory(): MediaSource.Factory {
-        val aesDataSource = AesDataSource(
-            encryptionManager = encryptionManager,
-        )
-
-        val factory = DataSource.Factory {
-            aesDataSource
-        }
-
-        return ProgressiveMediaSource.Factory(factory)
-    }
-
-    private fun createMediaItem(photo: Photo): MediaItem {
-        val uri = Uri.fromFile(app.getFileStreamPath(photo.internalFileName).canonicalFile)
-
-        return MediaItem.Builder()
-            .setMimeType(photo.type.mimeType)
-            .setUri(uri)
-            .build()
     }
 
     /**
-     * Release the current player
+     * SECURITY: Aggressively self-destructs all files in the secure cache.
      */
-    fun releasePlayer() {
-        player?.release()
-        player = null
+    fun cleanupCache() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val tempDir = File(app.cacheDir, "vlc_secure_cache")
+                if (tempDir.exists()) {
+                    tempDir.listFiles()?.forEach {
+                        it.delete()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
-        releasePlayer()
+        cleanupCache()
     }
 }

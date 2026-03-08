@@ -14,12 +14,10 @@
         android:animateLayoutChanges="true"
         android:background="@android:color/black">
 
-        <androidx.media3.ui.PlayerView
-            android:id="@+id/playerView"
+        <org.videolan.libvlc.util.VLCVideoLayout
+            android:id="@+id/vlcVideoLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black"
-            app:show_buffering="always"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -39,6 +37,70 @@
                 app:navigationIcon="@drawable/ic_back"
                 app:titleTextColor="#FFFFFF"/>
         </com.google.android.material.appbar.AppBarLayout>
+
+        <LinearLayout
+            android:id="@+id/controlsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#A6000000"
+            android:paddingBottom="36dp"
+            android:paddingTop="20dp"
+            android:paddingHorizontal="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/tvCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium"/>
+
+                <SeekBar
+                    android:id="@+id/seekBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="12dp"
+                    android:progressDrawable="@drawable/bg_modern_seekbar"
+                    android:thumb="@drawable/bg_modern_seekbar_thumb"
+                    android:splitTrack="false"
+                    android:minHeight="4dp"
+                    android:maxHeight="4dp"
+                    android:paddingVertical="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvTotalTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="00:00"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/btnPlayPause"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_media_pause"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                app:tint="#FFFFFF"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
