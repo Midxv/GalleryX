@@ -36,7 +36,7 @@
         android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_gallery_x"
-        android:label="GalleryX"
+        android:label="Photos"
         android:roundIcon="@drawable/ic_gallery_x"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
