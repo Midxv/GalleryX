@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 
 /**
  * The Top Bar for the Home Screen.
+ * Automatically requests focus and opens the keyboard when it animates in.
  */
 @Composable
 fun GalleryXHomeTopBar(
@@ -56,10 +57,8 @@ fun GalleryXHomeTopBar(
     placeholderText: String = "Search...",
     modifier: Modifier = Modifier
 ) {
-    // 1. Create a FocusRequester to open the keyboard automatically
     val focusRequester = remember { FocusRequester() }
 
-    // 2. Request focus when this composable enters the screen
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -115,7 +114,6 @@ fun GalleryXHomeTopBar(
                         ),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = true,
-                        // 3. Attach the FocusRequester to the TextField
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
@@ -128,6 +126,7 @@ fun GalleryXHomeTopBar(
 
 /**
  * A Standalone Capsule Search Bar for Action Menus (Detail Screen).
+ * Auto-focus is disabled so the keyboard only opens when explicitly tapped.
  */
 @Composable
 fun GalleryXActionSearchBar(
@@ -136,11 +135,7 @@ fun GalleryXActionSearchBar(
     placeholderText: String = "Search...",
     modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+    // Removed the LaunchedEffect block here so it doesn't auto-open the keyboard!
 
     Box(
         modifier = modifier
@@ -182,9 +177,7 @@ fun GalleryXActionSearchBar(
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
