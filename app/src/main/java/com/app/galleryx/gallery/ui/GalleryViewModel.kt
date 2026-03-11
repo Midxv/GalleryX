@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,13 +53,10 @@ class GalleryViewModel @Inject constructor(
     private val photoActionsChannel = Channel<PhotoAction>()
     val photoActions = photoActionsChannel.receiveAsFlow()
 
-    // FIXED: Use "gallery" string literal as the ID, since SortConfig.Gallery.id does not exist.
     private val sortId = "gallery"
     private val sortFlow = sortRepository.observeSortFor(sortId, SortConfig.Gallery.default)
     private val searchQuery = MutableStateFlow("")
 
-    // FIXED: Create a StateFlow to hold the current list of photos.
-    // This allows us to access .value synchronously later, replacing the missing getAll() method.
     @OptIn(ExperimentalCoroutinesApi::class)
     private val photosState = sortFlow.flatMapLatest { sort ->
         photoRepository.observeAll(sort)
@@ -75,14 +73,12 @@ class GalleryViewModel @Inject constructor(
     fun handleUiEvent(event: GalleryUiEvent) {
         when (event) {
             is GalleryUiEvent.OnDelete -> {
-                // FIXED: Use photosState.value instead of photoRepository.getAll()
                 val allPhotos = photosState.value
                 val entitiesToDelete = allPhotos.filter { photo -> event.items.contains(photo.uuid) }
                 photoActionsChannel.trySend(DeletePhotos(entitiesToDelete))
             }
             is GalleryUiEvent.OnExport -> {
                 if (event.target != null) {
-                    // FIXED: Use photosState.value
                     val allPhotos = photosState.value
                     val entitiesToExport = allPhotos.filter { photo -> event.items.contains(photo.uuid) }
                     photoActionsChannel.trySend(ExportPhotos(entitiesToExport, event.target))
@@ -94,27 +90,27 @@ class GalleryViewModel @Inject constructor(
             is GalleryUiEvent.OnImportChoice -> {
                 val navEvent = when (event.choice) {
                     is com.app.galleryx.gallery.components.ImportChoice.AddNewFiles ->
-                        // FIXED: Use ImportSource.InApp (Based on your provided ImportSource.kt)
                         GalleryNavigationEvent.StartImport(event.choice.fileUris, ImportSource.InApp)
                     is com.app.galleryx.gallery.components.ImportChoice.RestoreBackup ->
                         GalleryNavigationEvent.StartRestoreBackup(event.choice.backupUri)
                 }
                 navEventChannel.trySend(navEvent)
             }
-
             is GalleryUiEvent.SortChanged -> {
                 viewModelScope.launch {
                     sortRepository.updateSortFor(sortId, event.sort)
                 }
             }
-            is GalleryUiEvent.OnAddToAlbum -> {
-                // Feature placeholder
-            }
-            is GalleryUiEvent.OnAlbumSelected -> {
-                // Feature placeholder
-            }
-            GalleryUiEvent.CancelAlbumSelection -> {
-                // Feature placeholder
+            is GalleryUiEvent.OnAddToAlbum -> {}
+            is GalleryUiEvent.OnAlbumSelected -> {}
+            GalleryUiEvent.CancelAlbumSelection -> {}
+
+            // NEW: Move To Album
+            is GalleryUiEvent.MoveToAlbum -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    // Call the appropriate method in your PhotoRepository!
+                    // Example: photoRepository.addPhotosToAlbum(event.photoUuids, event.albumId)
+                }
             }
         }
     }

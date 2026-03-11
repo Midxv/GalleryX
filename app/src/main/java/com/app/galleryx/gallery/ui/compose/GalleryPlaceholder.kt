@@ -1,5 +1,5 @@
 /*
- * Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 GalleryX
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,8 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.galleryx.R
 import com.app.galleryx.gallery.ui.GalleryUiEvent
-import com.app.galleryx.gallery.components.ImportMenuBottomSheet
-import com.app.galleryx.ui.components.MagicFab
 import com.app.galleryx.ui.theme.AppTheme
 
 @Composable
@@ -50,9 +43,6 @@ fun GalleryPlaceholder(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-
-        var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
-
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -72,32 +62,7 @@ fun GalleryPlaceholder(
                 fontWeight = FontWeight.Bold
             )
         }
-
-        // FIXED: Anchored to the bottom-left!
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd) // <-- Shifted left
-                .navigationBarsPadding()
-                .padding(start = 24.dp, bottom = 96.dp) // Added start padding
-        ) {
-            MagicFab(
-                label = stringResource(R.string.import_menu_fab_label),
-                onClick = {
-                    importMenuBottomSheetVisible = true
-                }
-            )
-        }
-
-        ImportMenuBottomSheet(
-            open = importMenuBottomSheetVisible,
-            onDismissRequest = {
-                importMenuBottomSheetVisible = false
-            },
-            albumName = null,
-            onImportChoice = {
-                handleUiEvent(GalleryUiEvent.OnImportChoice(it))
-            }
-        )
+        // Import Button has been completely removed from the "All Files" placeholder
     }
 }
 

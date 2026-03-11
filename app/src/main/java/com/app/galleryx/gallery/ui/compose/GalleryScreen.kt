@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -40,8 +41,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.app.galleryx.R
+import com.app.galleryx.gallery.components.AlbumPickerDialog
+import com.app.galleryx.gallery.ui.GalleryUiEvent
 import com.app.galleryx.gallery.ui.GalleryViewModel
 import com.app.galleryx.gallery.ui.components.GalleryXHomeTopBar
 import com.app.galleryx.main.ui.MainViewModel
@@ -59,6 +63,10 @@ fun GalleryScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val uriHandler = LocalUriHandler.current
 
+    // Dialog States for Move to Album
+    var showMoveToAlbumDialog by remember { mutableStateOf(false) }
+    var itemsToMove by remember { mutableStateOf<List<String>>(emptyList()) }
+
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -66,7 +74,6 @@ fun GalleryScreen(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 Box {
-                    // Default Large Header (Same as Settings)
                     AnimatedVisibility(
                         visible = !isSearchVisible,
                         enter = fadeIn(),
@@ -84,7 +91,6 @@ fun GalleryScreen(
                         )
                     }
 
-                    // Search Bar Header
                     AnimatedVisibility(
                         visible = isSearchVisible,
                         enter = expandVertically() + fadeIn(),
@@ -94,6 +100,7 @@ fun GalleryScreen(
                             query = searchQuery,
                             onQueryChanged = { newQuery: String ->
                                 searchQuery = newQuery
+                                viewModel.onSearchQueryChanged(newQuery)
                             },
                             onSettingsClicked = onSettingsClicked,
                             onLogoClicked = {
@@ -117,7 +124,23 @@ fun GalleryScreen(
                 is com.app.galleryx.gallery.ui.GalleryUiState.Content -> GalleryContent(
                     uiState = state,
                     handleUiEvent = { viewModel.handleUiEvent(it) },
+                    onMoveToAlbumClicked = { items ->
+                        itemsToMove = items
+                        showMoveToAlbumDialog = true
+                    },
                     modifier = modifier
+                )
+            }
+
+            // The Dialog that appears when the user clicks "Move to Album"
+            if (showMoveToAlbumDialog) {
+                AlbumPickerDialog(
+                    viewModel = hiltViewModel(),
+                    onAlbumSelected = { targetAlbumId ->
+                        viewModel.handleUiEvent(GalleryUiEvent.MoveToAlbum(itemsToMove, targetAlbumId))
+                        showMoveToAlbumDialog = false
+                    },
+                    onDismiss = { showMoveToAlbumDialog = false }
                 )
             }
         }

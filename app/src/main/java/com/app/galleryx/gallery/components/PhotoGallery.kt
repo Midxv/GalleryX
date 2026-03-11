@@ -80,6 +80,7 @@ fun PhotoGallery(
     onImportChoice: (ImportChoice) -> Unit,
     additionalMultiSelectionActions: @Composable (ColumnScope.() -> Unit),
     modifier: Modifier = Modifier,
+    showImportButton: Boolean = true, // Added to toggle import button per screen
 ) {
     val activity = LocalActivity.current
     var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
@@ -113,31 +114,33 @@ fun PhotoGallery(
             transformableState = transformableState
         )
 
-        // FIXED: Anchored to the bottom-left!
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart) // <-- Shifted left
-                .navigationBarsPadding()
-                .padding(start = 24.dp, bottom = 96.dp) // Added start padding, kept height identical
-        ) {
-            AnimatedVisibility(
-                visible = multiSelectionState.isActive.value.not(),
-                enter = scaleIn(),
-                exit = scaleOut(),
+        // Only show the import button if requested (Hidden in All Files)
+        if (showImportButton) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                    .padding(start = 24.dp, bottom = 96.dp)
             ) {
-                MagicFab(
-                    label = stringResource(R.string.import_menu_fab_label),
-                    onClick = { importMenuBottomSheetVisible = true }
-                )
+                AnimatedVisibility(
+                    visible = multiSelectionState.isActive.value.not(),
+                    enter = scaleIn(),
+                    exit = scaleOut(),
+                ) {
+                    MagicFab(
+                        label = stringResource(R.string.import_menu_fab_label),
+                        onClick = { importMenuBottomSheetVisible = true }
+                    )
+                }
             }
-        }
 
-        ImportMenuBottomSheet(
-            open = importMenuBottomSheetVisible,
-            onDismissRequest = { importMenuBottomSheetVisible = false },
-            onImportChoice = onImportChoice,
-            albumName = albumName,
-        )
+            ImportMenuBottomSheet(
+                open = importMenuBottomSheetVisible,
+                onDismissRequest = { importMenuBottomSheetVisible = false },
+                onImportChoice = onImportChoice,
+                albumName = albumName,
+            )
+        }
 
         var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
         var showExportConfirmationDialog by remember { mutableStateOf(false) }
@@ -173,7 +176,10 @@ fun PhotoGallery(
         )
 
         MultiSelectionMenu(
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 120.dp), // Safely cushions above floating navbar
             multiSelectionState = multiSelectionState,
         ) {
             DropdownMenuItem(
@@ -344,7 +350,7 @@ private fun GalleryPhotoTile(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(20.dp)
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.BottomStart)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_videocam),

@@ -1,24 +1,17 @@
 /*
  * Copyright 2020–2026 GalleryX
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package com.app.galleryx.gallery.ui.compose
 
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.app.galleryx.R
 import com.app.galleryx.gallery.components.PhotoGallery
 import com.app.galleryx.gallery.components.PhotoTile
 import com.app.galleryx.gallery.components.rememberMultiSelectionState
@@ -32,6 +25,7 @@ import com.app.galleryx.sort.domain.SortConfig
 fun GalleryContent(
     uiState: GalleryUiState.Content,
     handleUiEvent: (GalleryUiEvent) -> Unit,
+    onMoveToAlbumClicked: (List<String>) -> Unit, // Callback for moving photos
     modifier: Modifier = Modifier
 ) {
     val multiSelectionState = rememberMultiSelectionState(items = uiState.photos.map { it.uuid })
@@ -39,12 +33,29 @@ fun GalleryContent(
     PhotoGallery(
         photos = uiState.photos,
         albumName = null,
+        showImportButton = false, // Hides the Import Fab in All Files
         multiSelectionState = multiSelectionState,
         onOpenPhoto = { handleUiEvent(GalleryUiEvent.OpenPhoto(it)) },
-        onExport = { handleUiEvent(GalleryUiEvent.OnExport(multiSelectionState.selectedItems.value.toList(), it)) },
-        onDelete = { handleUiEvent(GalleryUiEvent.OnDelete(multiSelectionState.selectedItems.value.toList())) },
+        // FIXED: Correctly matching your original OnExport and OnDelete parameters
+        onExport = { targetUri ->
+            handleUiEvent(GalleryUiEvent.OnExport(multiSelectionState.selectedItems.value.toList(), targetUri))
+        },
+        onDelete = {
+            handleUiEvent(GalleryUiEvent.OnDelete(multiSelectionState.selectedItems.value.toList()))
+        },
         onImportChoice = { handleUiEvent(GalleryUiEvent.OnImportChoice(it)) },
-        additionalMultiSelectionActions = {},
+        additionalMultiSelectionActions = {
+            // Added the Move to Album button to the 3-dots menu
+            DropdownMenuItem(
+                leadingIcon = { Icon(painter = painterResource(R.drawable.ic_folder), contentDescription = null) },
+                text = { Text("Move to Album") },
+                onClick = {
+                    onMoveToAlbumClicked(multiSelectionState.selectedItems.value.toList())
+                    multiSelectionState.dismissMore()
+                    multiSelectionState.cancelSelection()
+                },
+            )
+        },
         modifier = modifier
     )
 }
@@ -57,12 +68,12 @@ fun GalleryContentPreview() {
             uiState = GalleryUiState.Content(
                 photos = listOf(
                     PhotoTile("file1.jpg", PhotoType.JPEG, "1", 1024, System.currentTimeMillis()),
-                    PhotoTile("file2.jpg", PhotoType.JPEG, "2", 2048, System.currentTimeMillis()),
-                    PhotoTile("file3.jpg", PhotoType.JPEG, "3", 4096, System.currentTimeMillis())
+                    PhotoTile("file2.jpg", PhotoType.JPEG, "2", 2048, System.currentTimeMillis())
                 ),
                 sort = SortConfig.Gallery.default
             ),
-            handleUiEvent = {}
+            handleUiEvent = {},
+            onMoveToAlbumClicked = {}
         )
     }
 }
