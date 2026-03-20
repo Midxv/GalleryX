@@ -101,6 +101,20 @@ class Config(context: Context) {
         set(value) = putString(GALLERY_START_PAGE, value.value)
 
     /**
+     * Determines if the "All Files" bottom navigation menu item is hidden.
+     */
+    var galleryHideAllFilesMenu: Boolean
+        get() = getBoolean(GALLERY_HIDE_ALL_FILES_MENU, GALLERY_HIDE_ALL_FILES_MENU_DEFAULT)
+        set(value) = putBoolean(GALLERY_HIDE_ALL_FILES_MENU, value)
+
+    /**
+     * Determines if the search icon in the top app bar is hidden.
+     */
+    var galleryHideSearchIcon: Boolean
+        get() = getBoolean(GALLERY_HIDE_SEARCH_ICON, GALLERY_HIDE_SEARCH_ICON_DEFAULT)
+        set(value) = putBoolean(GALLERY_HIDE_SEARCH_ICON, value)
+
+    /**
      * Determines if screenshots should be allowed.
      */
     var securityAllowScreenshots: Boolean
@@ -228,6 +242,13 @@ class Config(context: Context) {
 
         const val GALLERY_START_PAGE = "gallery^startPage"
         val GALLERY_START_PAGE_DEFAULT = StartPage.AllFiles
+
+        // NEW: Keys and defaults for the new UI toggles
+        const val GALLERY_HIDE_ALL_FILES_MENU = "gallery^hideAllFilesMenu"
+        const val GALLERY_HIDE_ALL_FILES_MENU_DEFAULT = false
+
+        const val GALLERY_HIDE_SEARCH_ICON = "gallery^hideSearchIcon"
+        const val GALLERY_HIDE_SEARCH_ICON_DEFAULT = false
 
         const val SECURITY_ALLOW_SCREENSHOTS = "security^allowScreenshots"
         const val SECURITY_ALLOW_SCREENSHOTS_DEFAULT = false

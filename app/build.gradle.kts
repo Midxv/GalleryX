@@ -174,8 +174,9 @@ dependencies {
     implementation("com.google.code.gson", "gson", "2.13.1")
     implementation("androidx.exifinterface", "exifinterface", "1.4.1")
 
-    // Media: VLC Player
-    implementation("org.videolan.android:libvlc-all:3.5.1")
+    // Media: AndroidX Media3 (ExoPlayer)
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation("androidx.media3:media3-ui:1.2.1")
 
     // Media: Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")

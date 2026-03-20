@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -220,6 +219,12 @@ fun SettingsContent(
     val fragment = LocalFragment.current
     val navController = fragment?.findNavController()
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val config = remember { Config(context) }
+
+    // Read initial states directly from our updated Config.kt
+    var hideAllFiles by remember { mutableStateOf(config.galleryHideAllFilesMenu) }
+    var hideSearch by remember { mutableStateOf(config.galleryHideSearchIcon) }
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -253,12 +258,59 @@ fun SettingsContent(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(contentPadding)
-                    .padding(bottom = 140.dp, top = 8.dp) // Bottom padding for navbar
+                    .padding(bottom = 140.dp, top = 8.dp)
             ) {
+
+                // ==========================================
+                // CUSTOM UI: App Customization Toggles
+                // ==========================================
+                CustomSectionView(title = "App Customization") {
+                    PreferenceView(
+                        icon = painterResource(R.drawable.ic_folder),
+                        title = "Hide All Files Menu",
+                        summary = "Removes the 'All Files' tab from the bottom navigation.",
+                        trailing = {
+                            Switch(
+                                checked = hideAllFiles,
+                                onCheckedChange = { isChecked ->
+                                    hideAllFiles = isChecked
+                                    config.galleryHideAllFilesMenu = isChecked
+                                }
+                            )
+                        },
+                        onClick = {
+                            hideAllFiles = !hideAllFiles
+                            config.galleryHideAllFilesMenu = hideAllFiles
+                        }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                    )
+                    PreferenceView(
+                        icon = painterResource(android.R.drawable.ic_menu_search),
+                        title = "Hide Search Icon",
+                        summary = "Removes the search button from the top app bar.",
+                        trailing = {
+                            Switch(
+                                checked = hideSearch,
+                                onCheckedChange = { isChecked ->
+                                    hideSearch = isChecked
+                                    config.galleryHideSearchIcon = isChecked
+                                }
+                            )
+                        },
+                        onClick = {
+                            hideSearch = !hideSearch
+                            config.galleryHideSearchIcon = hideSearch
+                        }
+                    )
+                }
+                // ==========================================
+
                 for (section in screenConfig.sections) {
                     PreferenceSectionView(section = section) {
 
-                        // Filter out hidden preferences
                         val visiblePreferences = section.preferences.filter {
                             it.key != SettingsFragment.KEY_ACTION_HIDE_APP &&
                                     it.key != Config.SECURITY_DIAL_LAUNCH_CODE
@@ -273,7 +325,7 @@ fun SettingsContent(
                                         icon = painterResource(preference.icon),
                                         title = stringResource(preference.title),
                                         summary = stringResource(preference.summary),
-                                        showChevron = true, // iOS style navigation arrow
+                                        showChevron = true,
                                         onClick = {
                                             fragment ?: return@PreferenceView
                                             handleUiEvent(SettingsUiEvent.OnPreferenceClick(preference, null))
@@ -300,7 +352,6 @@ fun SettingsContent(
                                 }
                             }
 
-                            // iOS Style Indented Divider
                             if (!isLast) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(start = 56.dp),
@@ -311,9 +362,34 @@ fun SettingsContent(
                     }
                 }
 
-                // NEW DEV & COPYRIGHT FOOTER
                 SettingsFooter(uriHandler)
             }
+        }
+    }
+}
+
+// Custom Section wrapper to handle hardcoded Strings without needing string resources (R.string...)
+@Composable
+fun CustomSectionView(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+        ) {
+            content()
         }
     }
 }
@@ -327,7 +403,6 @@ fun SettingsFooter(uriHandler: UriHandler) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Redirection Buttons
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -359,7 +434,6 @@ fun SettingsFooter(uriHandler: UriHandler) {
             }
         }
 
-        // Copyright Info
         Text(
             text = "© 2026 Asif Middya • GalleryX",
             style = MaterialTheme.typography.labelMedium,
@@ -378,7 +452,6 @@ fun PreferenceSectionView(
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
     ) {
-        // Section Header (Small, capitalized, sitting above the card)
         Text(
             text = stringResource(section.title).uppercase(),
             style = MaterialTheme.typography.labelMedium,
@@ -386,8 +459,6 @@ fun PreferenceSectionView(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
         )
-
-        // The iOS-style rounded card holding the items
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -396,8 +467,6 @@ fun PreferenceSectionView(
         ) {
             content()
         }
-
-        // Section Summary (Sitting below the card)
         if (section.summary != null) {
             Text(
                 text = stringResource(section.summary),

@@ -23,6 +23,7 @@ import com.app.galleryx.R
 import com.app.galleryx.gallery.ui.importing.SharedUrisStore
 import com.app.galleryx.main.ui.navigation.MainMenuUiState
 import com.app.galleryx.uicomponnets.bindings.ObservableViewModel
+import com.app.galleryx.settings.data.Config
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -38,9 +39,19 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     app: Application,
     private val sharedUrisStore: SharedUrisStore,
+    private val config: Config // INJECTED CONFIG FOR STARTUP ROUTING
 ) : ObservableViewModel(app) {
 
-    private val _mainMenuUiState = MutableStateFlow(MainMenuUiState(R.id.galleryFragment))
+    // SMART ROUTING: Fallback to Albums if "All Files" is set as default but is hidden by the user.
+    private val initialDestinationId = if (config.galleryHideAllFilesMenu && config.galleryStartPage.name.contains("AllFiles", ignoreCase = true)) {
+        R.id.albumsFragment
+    } else if (config.galleryStartPage.name.contains("Album", ignoreCase = true)) {
+        R.id.albumsFragment
+    } else {
+        R.id.galleryFragment
+    }
+
+    private val _mainMenuUiState = MutableStateFlow(MainMenuUiState(initialDestinationId))
     val mainMenuUiState = _mainMenuUiState.asStateFlow()
 
     // Track if the bottom bar should be visible to fix the lockscreen bug

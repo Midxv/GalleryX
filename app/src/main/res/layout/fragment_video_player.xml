@@ -14,10 +14,11 @@
         android:animateLayoutChanges="true"
         android:background="@android:color/black">
 
-        <org.videolan.libvlc.util.VLCVideoLayout
-            android:id="@+id/vlcVideoLayout"
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:use_controller="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

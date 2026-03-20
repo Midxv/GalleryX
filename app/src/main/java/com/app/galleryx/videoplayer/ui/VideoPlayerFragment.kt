@@ -1,19 +1,3 @@
-/*
- * Copyright 2020–2026 GalleryX
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.app.galleryx.videoplayer.ui
 
 import android.annotation.SuppressLint
@@ -27,6 +11,10 @@ import android.view.View
 import android.widget.SeekBar
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.viewModels
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.app.galleryx.R
@@ -34,9 +22,6 @@ import com.app.galleryx.databinding.FragmentVideoPlayerBinding
 import com.app.galleryx.other.IntentParams
 import com.app.galleryx.other.extensions.hideSystemUI
 import com.app.galleryx.uicomponnets.bindings.BindableFragment
-import org.videolan.libvlc.LibVLC
-import org.videolan.libvlc.Media
-import org.videolan.libvlc.MediaPlayer
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -45,16 +30,32 @@ class VideoPlayerFragment :
 
     private val viewModel: VideoPlayerViewModel by viewModels()
 
-    private var libVLC: LibVLC? = null
-    private var mediaPlayer: MediaPlayer? = null
+    private var exoPlayer: ExoPlayer? = null
 
     private var isUserSeeking = false
     private val hideHandler = Handler(Looper.getMainLooper())
     private val hideRunnable = Runnable { hideControls() }
 
-    // Aspect Ratio States
-    private val aspectRatios = arrayOf(null, "16:9", "4:3", "1:1")
-    private val aspectRatioLabels = arrayOf("FIT", "16:9", "4:3", "1:1")
+    // Runnable to update custom seekbar since ExoPlayer doesn't emit tick events automatically
+    private val progressRunnable = object : Runnable {
+        override fun run() {
+            exoPlayer?.let { player ->
+                if (player.isPlaying && !isUserSeeking) {
+                    binding.seekBar.progress = player.currentPosition.toInt()
+                    binding.tvCurrentTime.text = formatTime(player.currentPosition)
+                }
+            }
+            hideHandler.postDelayed(this, 1000)
+        }
+    }
+
+    // ExoPlayer Resize Modes
+    private val resizeModes = arrayOf(
+        AspectRatioFrameLayout.RESIZE_MODE_FIT,
+        AspectRatioFrameLayout.RESIZE_MODE_FILL,
+        AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+    )
+    private val resizeModeLabels = arrayOf("FIT", "FILL", "ZOOM")
     private var currentAspectRatioIndex = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,22 +72,41 @@ class VideoPlayerFragment :
             return
         }
 
-        val options = arrayListOf("-vvv", "--drop-late-frames", "--skip-frames")
-        libVLC = LibVLC(requireContext(), options)
-        mediaPlayer = MediaPlayer(libVLC)
-        mediaPlayer?.attachViews(binding.vlcVideoLayout, null, false, false)
-
         setupControls()
         setupGestures()
 
         viewModel.setupPlayer(photoUUID) { filePath ->
-            libVLC?.let { vlc ->
-                val media = Media(vlc, filePath)
-                media.setHWDecoderEnabled(true, false)
-                mediaPlayer?.media = media
-                media.release()
-                mediaPlayer?.play()
-            }
+            initializePlayer(filePath)
+        }
+    }
+
+    private fun initializePlayer(filePath: String) {
+        exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
+            binding.playerView.player = this
+            setMediaItem(MediaItem.fromUri(filePath))
+
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_READY) {
+                        binding.seekBar.max = duration.toInt()
+                        binding.tvTotalTime.text = formatTime(duration)
+                    }
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) {
+                        binding.btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+                        hideHandler.post(progressRunnable)
+                        resetHideTimer()
+                    } else {
+                        binding.btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                        hideHandler.removeCallbacks(progressRunnable)
+                        hideHandler.removeCallbacks(hideRunnable)
+                    }
+                }
+            })
+            prepare()
+            play()
         }
     }
 
@@ -100,14 +120,14 @@ class VideoPlayerFragment :
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 val screenWidth = binding.touchOverlay.width
-                mediaPlayer?.let { player ->
+                exoPlayer?.let { player ->
                     if (e.x < screenWidth / 2) {
                         // Double Tap Left: Rewind 5s
-                        player.time = maxOf(0, player.time - 5000)
+                        player.seekTo(maxOf(0, player.currentPosition - 5000))
                         animateIndicator("-5s")
                     } else {
                         // Double Tap Right: Skip 5s
-                        player.time = minOf(player.length, player.time + 5000)
+                        player.seekTo(minOf(player.duration, player.currentPosition + 5000))
                         animateIndicator("+5s")
                     }
                 }
@@ -125,7 +145,7 @@ class VideoPlayerFragment :
     private fun setupControls() {
         // Play / Pause
         binding.btnPlayPause.setOnClickListener {
-            mediaPlayer?.let { player ->
+            exoPlayer?.let { player ->
                 if (player.isPlaying) player.pause() else player.play()
                 resetHideTimer()
             }
@@ -133,10 +153,10 @@ class VideoPlayerFragment :
 
         // Aspect Ratio Toggle
         binding.btnAspectRatio.setOnClickListener {
-            currentAspectRatioIndex = (currentAspectRatioIndex + 1) % aspectRatios.size
-            mediaPlayer?.aspectRatio = aspectRatios[currentAspectRatioIndex]
+            currentAspectRatioIndex = (currentAspectRatioIndex + 1) % resizeModes.size
+            binding.playerView.resizeMode = resizeModes[currentAspectRatioIndex]
 
-            val label = aspectRatioLabels[currentAspectRatioIndex]
+            val label = resizeModeLabels[currentAspectRatioIndex]
             binding.btnAspectRatio.text = label
             animateIndicator("Aspect: $label")
             resetHideTimer()
@@ -164,36 +184,10 @@ class VideoPlayerFragment :
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isUserSeeking = false
-                seekBar?.let { mediaPlayer?.time = it.progress.toLong() }
+                seekBar?.let { exoPlayer?.seekTo(it.progress.toLong()) }
                 resetHideTimer()
             }
         })
-
-        // VLC Callbacks
-        mediaPlayer?.setEventListener { event ->
-            requireActivity().runOnUiThread {
-                when (event.type) {
-                    MediaPlayer.Event.TimeChanged -> {
-                        if (!isUserSeeking) {
-                            binding.seekBar.progress = event.timeChanged.toInt()
-                            binding.tvCurrentTime.text = formatTime(event.timeChanged)
-                        }
-                    }
-                    MediaPlayer.Event.LengthChanged -> {
-                        binding.seekBar.max = event.lengthChanged.toInt()
-                        binding.tvTotalTime.text = formatTime(event.lengthChanged)
-                    }
-                    MediaPlayer.Event.Playing -> {
-                        binding.btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
-                        resetHideTimer()
-                    }
-                    MediaPlayer.Event.Paused -> {
-                        binding.btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
-                        hideHandler.removeCallbacks(hideRunnable)
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -226,7 +220,7 @@ class VideoPlayerFragment :
 
     private fun resetHideTimer() {
         hideHandler.removeCallbacks(hideRunnable)
-        if (mediaPlayer?.isPlaying == true) {
+        if (exoPlayer?.isPlaying == true) {
             hideHandler.postDelayed(hideRunnable, 3000)
         }
     }
@@ -242,18 +236,16 @@ class VideoPlayerFragment :
 
     override fun onPause() {
         super.onPause()
-        mediaPlayer?.pause()
+        exoPlayer?.pause()
     }
 
     override fun onDestroyView() {
         hideHandler.removeCallbacks(hideRunnable)
-        mediaPlayer?.stop()
-        mediaPlayer?.detachViews()
-        mediaPlayer?.release()
-        libVLC?.release()
-        mediaPlayer = null
-        libVLC = null
-        
+        hideHandler.removeCallbacks(progressRunnable)
+        exoPlayer?.stop()
+        exoPlayer?.release()
+        exoPlayer = null
+
         if (!requireActivity().isChangingConfigurations) {
             viewModel.cleanupCache()
         }
