@@ -143,6 +143,13 @@ class Config(context: Context) {
         set(value) = putString(SECURITY_DIAL_LAUNCH_CODE, value!!)
 
     /**
+     * Determines if uninstall protection (Device Admin) is enabled.
+     */
+    var securityUninstallProtection: Boolean
+        get() = getBoolean(SECURITY_UNINSTALL_PROTECTION, SECURITY_UNINSTALL_PROTECTION_DEFAULT)
+        set(value) = putBoolean(SECURITY_UNINSTALL_PROTECTION, value)
+
+    /**
      * Determines if files should be deleted after importing them.
      */
     var deleteImportedFiles: Boolean
@@ -261,6 +268,10 @@ class Config(context: Context) {
 
         const val SECURITY_DIAL_LAUNCH_CODE = "security^dialLaunchCode"
         const val SECURITY_DIAL_LAUNCH_CODE_DEFAULT = "1337"
+
+        // NEW: Keys and defaults for Uninstall Protection
+        const val SECURITY_UNINSTALL_PROTECTION = "security^uninstallProtection"
+        const val SECURITY_UNINSTALL_PROTECTION_DEFAULT = false
 
         const val ADVANCED_DELETE_IMPORTED_FILES = "advanced^deleteImportedFiles"
         const val ADVANCED_DELETE_IMPORTED_FILES_DEFAULT = false

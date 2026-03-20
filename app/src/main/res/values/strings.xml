@@ -70,6 +70,9 @@
     <string name="process_finished">Finished</string>
     <string name="process_initialize">Preparing…</string>
     <string name="process_aborted">Aborted</string>
+    <string name="settings_security_uninstall_protection_title">Uninstall Protection</string>
+    <string name="settings_security_uninstall_protection_summary">Prevent unauthorized uninstallation of GalleryX.</string>
+    <string name="device_admin_description">Enabling this prevents unauthorized removal of the app, protecting your hidden files.</string>
     <string name="process_failures_occurred">\u26A0 Some elements could not get processed</string>
 
     <string name="view_photo_detail_title">Details</string>

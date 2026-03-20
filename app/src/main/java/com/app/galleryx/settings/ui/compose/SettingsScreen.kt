@@ -16,6 +16,10 @@
 
 package com.app.galleryx.settings.ui.compose
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -86,6 +90,7 @@ import com.app.galleryx.other.extensions.show
 import com.app.galleryx.other.openUrl
 import com.app.galleryx.other.sendEmail
 import com.app.galleryx.other.setAppDesign
+import com.app.galleryx.security.UninstallProtectionReceiver
 import com.app.galleryx.settings.data.Config
 import com.app.galleryx.settings.domain.Preference
 import com.app.galleryx.settings.domain.PreferenceScreenConfig
@@ -112,6 +117,17 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
     val context = LocalContext.current
     val activity = LocalActivity.current
 
+    // Device Admin Setup for Uninstall Protection
+    val devicePolicyManager = remember { context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager }
+    val adminComponent = remember { ComponentName(context, UninstallProtectionReceiver::class.java) }
+    val config = remember { Config(context) }
+
+    val deviceAdminLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+        // Sync config after user returns from the system prompt
+        val isActive = devicePolicyManager.isAdminActive(adminComponent)
+        config.securityUninstallProtection = isActive
+    }
+
     val backupLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         fragment ?: return@rememberLauncherForActivityResult
@@ -120,6 +136,29 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
 
     LaunchedEffect(Unit) {
         fragment ?: return@LaunchedEffect
+
+        // Uninstall Protection Callback
+        viewModel.registerPreferenceCallback(Config.SECURITY_UNINSTALL_PROTECTION) { value ->
+            val enable = value as Boolean
+            val isActive = devicePolicyManager.isAdminActive(adminComponent)
+
+            if (enable && !isActive) {
+                // Launch system prompt
+                val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                    putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent)
+                    putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.device_admin_description))
+                }
+                deviceAdminLauncher.launch(intent)
+                false // wait for result
+            } else if (!enable && isActive) {
+                // Remove Device Admin
+                devicePolicyManager.removeActiveAdmin(adminComponent)
+                config.securityUninstallProtection = false
+                true
+            } else {
+                true
+            }
+        }
 
         viewModel.registerPreferenceCallback(Config.SYSTEM_DESIGN) {
             it as SystemDesignEnum
@@ -225,6 +264,7 @@ fun SettingsContent(
     // Read initial states directly from our updated Config.kt
     var hideAllFiles by remember { mutableStateOf(config.galleryHideAllFilesMenu) }
     var hideSearch by remember { mutableStateOf(config.galleryHideSearchIcon) }
+    var uninstallProtection by remember { mutableStateOf(config.securityUninstallProtection) }
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -303,6 +343,51 @@ fun SettingsContent(
                         onClick = {
                             hideSearch = !hideSearch
                             config.galleryHideSearchIcon = hideSearch
+                        }
+                    )
+                }
+
+                // ==========================================
+                // CUSTOM UI: Security & Protection
+                // ==========================================
+                CustomSectionView(title = "Security & Protection") {
+                    PreferenceView(
+                        icon = painterResource(R.drawable.ic_lock),
+                        title = stringResource(R.string.settings_security_uninstall_protection_title),
+                        summary = stringResource(R.string.settings_security_uninstall_protection_summary),
+                        trailing = {
+                            Switch(
+                                checked = uninstallProtection,
+                                onCheckedChange = { isChecked ->
+                                    uninstallProtection = isChecked
+                                    handleUiEvent(
+                                        SettingsUiEvent.OnPreferenceClick(
+                                            Preference.Switch(
+                                                key = Config.SECURITY_UNINSTALL_PROTECTION,
+                                                title = R.string.settings_security_uninstall_protection_title,
+                                                summary = R.string.settings_security_uninstall_protection_summary,
+                                                icon = R.drawable.ic_lock,
+                                                default = false
+                                            ), isChecked
+                                        )
+                                    )
+                                }
+                            )
+                        },
+                        onClick = {
+                            val newValue = !uninstallProtection
+                            uninstallProtection = newValue
+                            handleUiEvent(
+                                SettingsUiEvent.OnPreferenceClick(
+                                    Preference.Switch(
+                                        key = Config.SECURITY_UNINSTALL_PROTECTION,
+                                        title = R.string.settings_security_uninstall_protection_title,
+                                        summary = R.string.settings_security_uninstall_protection_summary,
+                                        icon = R.drawable.ic_lock,
+                                        default = false
+                                    ), newValue
+                                )
+                            )
                         }
                     )
                 }
