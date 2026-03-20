@@ -32,13 +32,13 @@
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 android:src="@drawable/ic_gallery_x"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="18dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Locker"
-                android:textSize="32sp"
+                android:text="Vault"
+                android:textSize="37sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
                 android:layout_marginBottom="40dp"
@@ -58,8 +58,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/unlock_title"
-                    android:textColor="#333333"
+                    android:text="Enter Password"
+                    android:textColor="#333332"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:layout_gravity="center"
@@ -80,7 +80,7 @@
                     android:layout_gravity="center"
                     android:layout_marginBottom="12dp"
                     android:text="@string/unlock_wrong_password"
-                    android:textColor="@color/darkRed"
+                    android:textColor="@color/colorSecondaryVariant"
                     android:visibility="invisible" />
 
                 <Button
@@ -90,7 +90,7 @@
                     android:onClick="@{() -> viewModel.unlock()}"
                     android:text="@string/unlock_button"
                     android:backgroundTint="#6200EE"
-                    android:textColor="@color/colorComplementary"
+                    android:textColor="@color/ic_launcher_background"
                     android:visibility="visible"
                     style="@style/Widget.MaterialComponents.Button"/>
 
@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:text="@string/biometric_unlock_hint_button"
-            android:textColor="@android:color/white"
+            android:textColor="@color/darkYellow"
             android:layout_marginBottom="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
