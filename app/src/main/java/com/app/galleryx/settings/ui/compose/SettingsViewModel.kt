@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.settings.ui.compose
@@ -33,6 +33,7 @@ import com.app.galleryx.settings.domain.Preference
 import com.app.galleryx.settings.domain.PreferenceScreenConfig
 import com.app.galleryx.settings.domain.PreferenceScreenConfigContent
 import com.app.galleryx.settings.domain.models.SettingsEnum
+import com.app.galleryx.settings.ui.hideapp.usecase.ToggleMainComponentUseCase
 import com.app.galleryx.uicomponnets.Dialogs
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -57,6 +58,7 @@ class SettingsViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val albumRepository: AlbumRepository,
     private val passwordManager: PasswordManager,
+    private val toggleMainComponentUseCase: ToggleMainComponentUseCase // NEW: Injected UseCase
 ) : ViewModel() {
 
 
@@ -92,6 +94,14 @@ class SettingsViewModel @Inject constructor(
     }
 
     private val callbacks: MutableMap<String, (value: Any?) -> Boolean> = mutableMapOf()
+
+    // NEW: Function to trigger the disguise mode
+    fun toggleDisguiseApp(enable: Boolean) {
+        val isEnabled = toggleMainComponentUseCase.isDisguiseComponentEnabled()
+        if (enable != isEnabled) {
+            toggleMainComponentUseCase.toggleDisguise()
+        }
+    }
 
     fun onBiometricUnlockChanged(value: Any?, fragment: Fragment): Boolean {
         value as Boolean

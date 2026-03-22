@@ -150,6 +150,13 @@ class Config(context: Context) {
         set(value) = putBoolean(SECURITY_UNINSTALL_PROTECTION, value)
 
     /**
+     * Determines if the app should be disguised as "System Apps"
+     */
+    var securityDisguiseApp: Boolean
+        get() = getBoolean(SECURITY_DISGUISE_APP, SECURITY_DISGUISE_APP_DEFAULT)
+        set(value) = putBoolean(SECURITY_DISGUISE_APP, value)
+
+    /**
      * Determines if files should be deleted after importing them.
      */
     var deleteImportedFiles: Boolean
@@ -220,16 +227,9 @@ class Config(context: Context) {
 
     // endregion
 
-    // Single source of truth for config keys and defaults. Always use these constants
     companion object {
-        /**
-         * The filename used to store the preferences.
-         */
         const val FILE_NAME = "${BuildConfig.APPLICATION_ID}_preferences"
 
-        /**
-         * Always use private mode to open preferences.
-         */
         const val MODE = Context.MODE_PRIVATE
 
         const val SYSTEM_FIRST_START = "system^firstStart"
@@ -250,7 +250,6 @@ class Config(context: Context) {
         const val GALLERY_START_PAGE = "gallery^startPage"
         val GALLERY_START_PAGE_DEFAULT = StartPage.AllFiles
 
-        // NEW: Keys and defaults for the new UI toggles
         const val GALLERY_HIDE_ALL_FILES_MENU = "gallery^hideAllFilesMenu"
         const val GALLERY_HIDE_ALL_FILES_MENU_DEFAULT = false
 
@@ -269,9 +268,12 @@ class Config(context: Context) {
         const val SECURITY_DIAL_LAUNCH_CODE = "security^dialLaunchCode"
         const val SECURITY_DIAL_LAUNCH_CODE_DEFAULT = "1337"
 
-        // NEW: Keys and defaults for Uninstall Protection
         const val SECURITY_UNINSTALL_PROTECTION = "security^uninstallProtection"
         const val SECURITY_UNINSTALL_PROTECTION_DEFAULT = false
+
+        // NEW: Key for the Disguise feature
+        const val SECURITY_DISGUISE_APP = "security^disguiseApp"
+        const val SECURITY_DISGUISE_APP_DEFAULT = false
 
         const val ADVANCED_DELETE_IMPORTED_FILES = "advanced^deleteImportedFiles"
         const val ADVANCED_DELETE_IMPORTED_FILES_DEFAULT = false

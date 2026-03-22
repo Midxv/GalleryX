@@ -137,6 +137,13 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
     LaunchedEffect(Unit) {
         fragment ?: return@LaunchedEffect
 
+        // NEW: Disguise App Callback
+        viewModel.registerPreferenceCallback(Config.SECURITY_DISGUISE_APP) { value ->
+            val enable = value as Boolean
+            viewModel.toggleDisguiseApp(enable)
+            true
+        }
+
         // Uninstall Protection Callback
         viewModel.registerPreferenceCallback(Config.SECURITY_UNINSTALL_PROTECTION) { value ->
             val enable = value as Boolean
@@ -265,6 +272,7 @@ fun SettingsContent(
     var hideAllFiles by remember { mutableStateOf(config.galleryHideAllFilesMenu) }
     var hideSearch by remember { mutableStateOf(config.galleryHideSearchIcon) }
     var uninstallProtection by remember { mutableStateOf(config.securityUninstallProtection) }
+    var disguiseApp by remember { mutableStateOf(config.securityDisguiseApp) } // NEW
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -384,6 +392,51 @@ fun SettingsContent(
                                         title = R.string.settings_security_uninstall_protection_title,
                                         summary = R.string.settings_security_uninstall_protection_summary,
                                         icon = R.drawable.ic_lock,
+                                        default = false
+                                    ), newValue
+                                )
+                            )
+                        }
+                    )
+
+                    // NEW: Disguise App Toggle
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                    )
+                    PreferenceView(
+                        icon = painterResource(R.drawable.ic_eye_closed),
+                        title = stringResource(R.string.settings_security_disguise_app_title),
+                        summary = stringResource(R.string.settings_security_disguise_app_summary),
+                        trailing = {
+                            Switch(
+                                checked = disguiseApp,
+                                onCheckedChange = { isChecked ->
+                                    disguiseApp = isChecked
+                                    handleUiEvent(
+                                        SettingsUiEvent.OnPreferenceClick(
+                                            Preference.Switch(
+                                                key = Config.SECURITY_DISGUISE_APP,
+                                                title = R.string.settings_security_disguise_app_title,
+                                                summary = R.string.settings_security_disguise_app_summary,
+                                                icon = R.drawable.ic_eye_closed,
+                                                default = false
+                                            ), isChecked
+                                        )
+                                    )
+                                }
+                            )
+                        },
+                        onClick = {
+                            val newValue = !disguiseApp
+                            disguiseApp = newValue
+                            handleUiEvent(
+                                SettingsUiEvent.OnPreferenceClick(
+                                    Preference.Switch(
+                                        key = Config.SECURITY_DISGUISE_APP,
+                                        title = R.string.settings_security_disguise_app_title,
+                                        summary = R.string.settings_security_disguise_app_summary,
+                                        icon = R.drawable.ic_eye_closed,
                                         default = false
                                     ), newValue
                                 )
