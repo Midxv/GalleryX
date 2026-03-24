@@ -2,18 +2,22 @@ package com.app.galleryx.videoplayer.ui
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.SeekBar
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.viewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,14 +25,20 @@ import com.app.galleryx.R
 import com.app.galleryx.databinding.FragmentVideoPlayerBinding
 import com.app.galleryx.other.IntentParams
 import com.app.galleryx.other.extensions.hideSystemUI
+import com.app.galleryx.security.EncryptionManager
 import com.app.galleryx.uicomponnets.bindings.BindableFragment
+import java.io.File
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class VideoPlayerFragment :
     BindableFragment<FragmentVideoPlayerBinding>(R.layout.fragment_video_player) {
 
     private val viewModel: VideoPlayerViewModel by viewModels()
+
+    @Inject
+    lateinit var encryptionManager: EncryptionManager
 
     private var exoPlayer: ExoPlayer? = null
 
@@ -62,6 +72,18 @@ class VideoPlayerFragment :
         super.onViewCreated(view, savedInstanceState)
         requireActivity().hideSystemUI()
 
+        // Intro animation for a smoother opening experience
+        view.alpha = 0f
+        view.scaleX = 0.95f
+        view.scaleY = 0.95f
+        view.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(350)
+            .setInterpolator(DecelerateInterpolator(1.5f))
+            .start()
+
         binding.videoPlayerToolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
@@ -81,15 +103,32 @@ class VideoPlayerFragment :
     }
 
     private fun initializePlayer(filePath: String) {
+        // 1. Create our custom offline decryptor
+        val dataSourceFactory = DataSource.Factory {
+            EncryptedFileDataSource(encryptionManager)
+        }
+
+        // 2. Wrap it so ExoPlayer understands how to stream it
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(Uri.fromFile(File(filePath))))
+
         exoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
             binding.playerView.player = this
-            setMediaItem(MediaItem.fromUri(filePath))
+
+            // Use setMediaSource instead of setMediaItem for custom decryption
+            setMediaSource(mediaSource)
+
+            // INSTANT AUTO-PLAY
+            playWhenReady = true
 
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
                     if (state == Player.STATE_READY) {
                         binding.seekBar.max = duration.toInt()
                         binding.tvTotalTime.text = formatTime(duration)
+
+                        // BULLETPROOF AUTO-PLAY
+                        play()
                     }
                 }
 
@@ -105,6 +144,7 @@ class VideoPlayerFragment :
                     }
                 }
             })
+
             prepare()
             play()
         }
@@ -190,9 +230,6 @@ class VideoPlayerFragment :
         })
     }
 
-    /**
-     * Beautiful ripple fade animation for user actions
-     */
     private fun animateIndicator(text: String) {
         binding.tvIndicator.text = text
         binding.tvIndicator.alpha = 1f
@@ -248,6 +285,9 @@ class VideoPlayerFragment :
 
         if (!requireActivity().isChangingConfigurations) {
             viewModel.cleanupCache()
+
+            // FIX: Reset the Activity orientation back to the system default
+            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
 
         super.onDestroyView()
