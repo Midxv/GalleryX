@@ -12,8 +12,8 @@
       "filters": [],
       "attributes": [],
       "versionCode": 58,
-      "versionName": "3.0",
-      "outputFile": "GalleryX-3.0-play-release.apk"
+      "versionName": "3.3",
+      "outputFile": "GalleryX-3.3-play-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/GalleryX-3.0-play-release.dm"
+        "baselineProfiles/1/GalleryX-3.3-play-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/GalleryX-3.0-play-release.dm"
+        "baselineProfiles/0/GalleryX-3.3-play-release.dm"
       ]
     }
   ],

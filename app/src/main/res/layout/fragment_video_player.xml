@@ -49,18 +49,23 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/videoPlayerAppBarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:background="#66000000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:background="@android:color/transparent"
             app:elevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/videoPlayerToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_player_control_round"
                 app:navigationIcon="@drawable/ic_back"
-                app:titleTextColor="#FFFFFF"/>
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
@@ -68,10 +73,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#99000000"
-            android:paddingBottom="36dp"
-            android:paddingTop="20dp"
+            android:background="@drawable/bg_video_indicator"
+            android:paddingBottom="24dp"
+            android:paddingTop="24dp"
             android:paddingHorizontal="24dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="40dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <LinearLayout
@@ -79,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="24dp">
 
                 <TextView
                     android:id="@+id/tvCurrentTime"
@@ -87,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:text="00:00"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"/>
 
                 <SeekBar
@@ -99,8 +106,8 @@
                     android:progressDrawable="@drawable/bg_modern_seekbar"
                     android:thumb="@drawable/bg_modern_seekbar_thumb"
                     android:splitTrack="false"
-                    android:minHeight="4dp"
-                    android:maxHeight="4dp"
+                    android:minHeight="6dp"
+                    android:maxHeight="6dp"
                     android:paddingVertical="8dp"/>
 
                 <TextView
@@ -109,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:text="00:00"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"/>
             </LinearLayout>
 
@@ -125,9 +132,9 @@
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:fontFamily="sans-serif-bold"
-                    android:background="@drawable/bg_video_indicator"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
@@ -153,9 +160,9 @@
                     android:textColor="#FFFFFF"
                     android:textSize="12sp"
                     android:fontFamily="sans-serif-bold"
-                    android:background="@drawable/bg_video_indicator"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
