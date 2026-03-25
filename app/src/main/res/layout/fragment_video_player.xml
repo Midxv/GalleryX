@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -37,10 +38,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_video_indicator"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="15sp"
             android:fontFamily="sans-serif-medium"
-            android:paddingHorizontal="32dp"
-            android:paddingVertical="16dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
             android:alpha="0"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -75,7 +76,7 @@
             android:orientation="vertical"
             android:background="@drawable/bg_video_indicator"
             android:paddingBottom="24dp"
-            android:paddingTop="24dp"
+            android:paddingTop="20dp"
             android:paddingHorizontal="24dp"
             android:layout_marginHorizontal="20dp"
             android:layout_marginBottom="40dp"
@@ -93,7 +94,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="00:00"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E2E2E2"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"/>
 
@@ -102,20 +103,22 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginHorizontal="16dp"
                     android:progressDrawable="@drawable/bg_modern_seekbar"
                     android:thumb="@drawable/bg_modern_seekbar_thumb"
                     android:splitTrack="false"
-                    android:minHeight="6dp"
-                    android:maxHeight="6dp"
-                    android:paddingVertical="8dp"/>
+                    android:minHeight="18dp"
+                    android:maxHeight="18dp"
+                    android:paddingVertical="8dp"
+                    android:progressTint="#FFFFFF"
+                    android:thumbTint="#FFFFFF"/>
 
                 <TextView
                     android:id="@+id/tvTotalTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="00:00"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#E2E2E2"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"/>
             </LinearLayout>
@@ -130,23 +133,24 @@
                     android:layout_height="wrap_content"
                     android:text="FIT"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:fontFamily="sans-serif-bold"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <ImageView
                     android:id="@+id/btnPlayPause"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
                     android:src="@android:drawable/ic_media_pause"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="12dp"
+                    android:background="@drawable/bg_player_control_round"
+                    android:padding="22dp"
                     app:tint="#FFFFFF"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -158,11 +162,11 @@
                     android:layout_height="wrap_content"
                     android:text="ROTATE"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:fontFamily="sans-serif-bold"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>

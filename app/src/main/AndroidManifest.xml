@@ -20,9 +20,9 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_gallery_x"
-        android:label="GalleryX"
-        android:roundIcon="@drawable/ic_gallery_x"
+        android:icon="@android:drawable/sym_def_app_icon"
+        android:label="Total Apps Size"
+        android:roundIcon="@android:drawable/sym_def_app_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
