@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# --- KEEP ONNX AI ENGINE SAFE FROM OBFUSCATION ---
+-keep class ai.onnxruntime.** { *; }
+-keepclassmembers class ai.onnxruntime.** { *; }
+
+# --- KEEP YOUR DATABASE ENTITIES SAFE ---
+-keep class com.app.galleryx.model.database.entity.Photo { *; }

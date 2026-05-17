@@ -33,6 +33,7 @@ import com.app.galleryx.gallery.ui.navigation.PhotoAction
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.DeletePhotos
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.ExportPhotos
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.OpenPhoto
+import com.app.galleryx.search.SearchEngine // --- ADDED IMPORT ---
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.domain.SortRepository
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn // --- ADDED IMPORT ---
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -54,6 +56,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
     private val albumsRepository: AlbumRepository,
     private val sortRepository: SortRepository,
     private val resources: Resources,
+    private val searchEngine: SearchEngine // --- NEW: Injected AI Engine ---
 ) : ViewModel() {
 
     private val sortFlow = sortRepository.observeSortFor(albumUuid = albumUUID, default = SortConfig.Album.default)
@@ -73,10 +76,31 @@ class AlbumDetailViewModel @AssistedInject constructor(
         searchQuery
     ) { album, sort, query ->
 
-        val filteredFiles = if (query.isBlank()) {
-            album.files
+        // --- NEW: Universal AI Search Block ---
+        val filteredFiles = if (query.isNotBlank()) {
+            val queryVector = searchEngine.getQueryEmbedding(query)
+
+            if (queryVector != null) {
+                // 1. Calculate Cosine Similarity against photos ONLY IN THIS ALBUM
+                val scoredPhotos = album.files.mapNotNull { photo ->
+                    photo.embedding?.let { embeddingBytes ->
+                        val photoVector = searchEngine.byteArrayToFloatArray(embeddingBytes)
+                        val score = searchEngine.cosineSimilarity(queryVector, photoVector)
+                        Pair(photo, score)
+                    }
+                }
+
+                // 2. Filter out weak matches and sort by highest similarity
+                scoredPhotos
+                    .filter { it.second > 0.22f }
+                    .sortedByDescending { it.second }
+                    .map { it.first }
+            } else {
+                // Fallback to basic filename search
+                album.files.filter { it.fileName.contains(query, ignoreCase = true) }
+            }
         } else {
-            album.files.filter { it.fileName.contains(query, ignoreCase = true) }
+            album.files
         }
 
         AlbumDetailUiState(
@@ -94,7 +118,9 @@ class AlbumDetailViewModel @AssistedInject constructor(
             sort = sort,
             searchQuery = query
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AlbumDetailUiState())
+    }
+        .flowOn(Dispatchers.IO) // --- CRITICAL: Matrix math runs on background thread ---
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AlbumDetailUiState())
 
 
     private val navEventsChannel = Channel<AlbumDetailNavigator.NavigationEvent>()
@@ -196,6 +222,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
+        // Dagger automatically fulfills the non-assisted parameters (like SearchEngine)
         fun create(@Assisted(ALBUM_DETAIL_UUID) albumUUID: String): AlbumDetailViewModel
     }
 }

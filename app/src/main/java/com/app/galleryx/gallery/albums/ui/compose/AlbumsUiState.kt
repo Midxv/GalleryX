@@ -16,28 +16,19 @@
 
 package com.app.galleryx.gallery.albums.ui.compose
 
-import com.app.galleryx.model.database.entity.Photo
-
 sealed interface AlbumsUiState {
     val showCreateDialog: Boolean
     val searchQuery: String
-    val indexedCount: Int
-    val totalCount: Int
 
     data class Empty(
         override val showCreateDialog: Boolean = false,
-        override val searchQuery: String = "",
-        override val indexedCount: Int = 0,
-        override val totalCount: Int = 0
+        override val searchQuery: String = ""
     ) : AlbumsUiState
 
     data class Content(
         val albums: List<AlbumItem>,
-        val photoResults: List<Photo>? = null, // NEW: Holds AI search fallback results
         override val showCreateDialog: Boolean = false,
-        override val searchQuery: String = "",
-        override val indexedCount: Int = 0,
-        override val totalCount: Int = 0
+        override val searchQuery: String = ""
     ) : AlbumsUiState
 }
 

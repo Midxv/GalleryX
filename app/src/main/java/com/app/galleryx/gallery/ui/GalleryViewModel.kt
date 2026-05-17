@@ -1,17 +1,5 @@
 /*
  * Copyright 2020–2026 GalleryX
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package com.app.galleryx.gallery.ui
@@ -47,7 +35,7 @@ class GalleryViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val sortRepository: SortRepository,
     private val galleryUiStateFactory: GalleryUiStateFactory,
-    private val searchEngine: SearchEngine // --- NEW: Injected AI Engine ---
+    private val searchEngine: SearchEngine
 ) : ViewModel() {
 
     private val navEventChannel = Channel<GalleryNavigationEvent>()
@@ -70,12 +58,16 @@ class GalleryViewModel @Inject constructor(
         sortFlow,
         searchQuery
     ) { photos, sort, query ->
+
+        // --- 1. CALCULATE INDEXING PROGRESS ---
+        val total = photos.size
+        val indexed = photos.count { it.embedding != null }
+
         if (query.isNotBlank()) {
-            // 1. Generate text vector for the search term
             val queryVector = searchEngine.getQueryEmbedding(query)
 
             if (queryVector != null) {
-                // 2. Calculate Cosine Similarity against all stored photo vectors
+                // AI Semantic Search
                 val scoredPhotos = photos.mapNotNull { photo ->
                     photo.embedding?.let { embeddingBytes ->
                         val photoVector = searchEngine.byteArrayToFloatArray(embeddingBytes)
@@ -84,26 +76,24 @@ class GalleryViewModel @Inject constructor(
                     }
                 }
 
-                // 3. Filter out weak matches and sort by highest similarity
-                // Note: You can adjust the 0.22f threshold based on how your specific CLIP model behaves
                 val semanticResults = scoredPhotos
                     .filter { it.second > 0.22f }
                     .sortedByDescending { it.second }
                     .map { it.first }
 
-                galleryUiStateFactory.create(semanticResults, sort, query)
+                galleryUiStateFactory.create(semanticResults, sort, query, total, indexed)
             } else {
-                // Fallback: If AI fails to load or text model errors out, fall back to basic filename search
+                // Fallback Text Search
                 val fallbackResults = photos.filter { it.fileName.contains(query, ignoreCase = true) }
-                galleryUiStateFactory.create(fallbackResults, sort, query)
+                galleryUiStateFactory.create(fallbackResults, sort, query, total, indexed)
             }
         } else {
-            // No search query, show normal gallery sorted by the user's preference
-            galleryUiStateFactory.create(photos, sort, "")
+            // Normal Gallery View
+            galleryUiStateFactory.create(photos, sort, "", total, indexed)
         }
     }
-        .flowOn(Dispatchers.IO) // --- CRITICAL: Pushes the matrix math off the UI thread ---
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GalleryUiState.Empty)
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GalleryUiState.Empty())
 
     fun handleUiEvent(event: GalleryUiEvent) {
         when (event) {
@@ -139,12 +129,9 @@ class GalleryViewModel @Inject constructor(
             is GalleryUiEvent.OnAddToAlbum -> {}
             is GalleryUiEvent.OnAlbumSelected -> {}
             GalleryUiEvent.CancelAlbumSelection -> {}
-
-            // NEW: Move To Album
             is GalleryUiEvent.MoveToAlbum -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    // Call the appropriate method in your PhotoRepository!
-                    // Example: photoRepository.addPhotosToAlbum(event.photoUuids, event.albumId)
+                    // Call the appropriate method in your PhotoRepository
                 }
             }
         }

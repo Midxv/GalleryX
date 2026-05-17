@@ -21,10 +21,21 @@ import com.app.galleryx.sort.domain.Sort
 import com.app.galleryx.sort.domain.SortConfig
 
 sealed interface GalleryUiState {
-    data object Empty : GalleryUiState
+    val searchQuery: String
+    val totalCount: Int
+    val indexedCount: Int
+
+    data class Empty(
+        override val searchQuery: String = "",
+        override val totalCount: Int = 0,
+        override val indexedCount: Int = 0
+    ) : GalleryUiState
+
     data class Content(
         val photos: List<PhotoTile>,
         val sort: Sort = SortConfig.Gallery.default,
-        val searchQuery: String = ""
+        override val searchQuery: String = "",
+        override val totalCount: Int = 0,
+        override val indexedCount: Int = 0
     ) : GalleryUiState
 }
