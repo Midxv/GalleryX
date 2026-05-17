@@ -26,18 +26,20 @@ import com.app.galleryx.gallery.ui.navigation.PhotoAction.ExportPhotos
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.OpenPhoto
 import com.app.galleryx.model.repositories.ImportSource
 import com.app.galleryx.model.repositories.PhotoRepository
+import com.app.galleryx.search.SearchEngine
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.domain.SortRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +47,7 @@ class GalleryViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
     private val sortRepository: SortRepository,
     private val galleryUiStateFactory: GalleryUiStateFactory,
+    private val searchEngine: SearchEngine // --- NEW: Injected AI Engine ---
 ) : ViewModel() {
 
     private val navEventChannel = Channel<GalleryNavigationEvent>()
@@ -67,8 +70,40 @@ class GalleryViewModel @Inject constructor(
         sortFlow,
         searchQuery
     ) { photos, sort, query ->
-        galleryUiStateFactory.create(photos, sort, query)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GalleryUiState.Empty)
+        if (query.isNotBlank()) {
+            // 1. Generate text vector for the search term
+            val queryVector = searchEngine.getQueryEmbedding(query)
+
+            if (queryVector != null) {
+                // 2. Calculate Cosine Similarity against all stored photo vectors
+                val scoredPhotos = photos.mapNotNull { photo ->
+                    photo.embedding?.let { embeddingBytes ->
+                        val photoVector = searchEngine.byteArrayToFloatArray(embeddingBytes)
+                        val score = searchEngine.cosineSimilarity(queryVector, photoVector)
+                        Pair(photo, score)
+                    }
+                }
+
+                // 3. Filter out weak matches and sort by highest similarity
+                // Note: You can adjust the 0.22f threshold based on how your specific CLIP model behaves
+                val semanticResults = scoredPhotos
+                    .filter { it.second > 0.22f }
+                    .sortedByDescending { it.second }
+                    .map { it.first }
+
+                galleryUiStateFactory.create(semanticResults, sort, query)
+            } else {
+                // Fallback: If AI fails to load or text model errors out, fall back to basic filename search
+                val fallbackResults = photos.filter { it.fileName.contains(query, ignoreCase = true) }
+                galleryUiStateFactory.create(fallbackResults, sort, query)
+            }
+        } else {
+            // No search query, show normal gallery sorted by the user's preference
+            galleryUiStateFactory.create(photos, sort, "")
+        }
+    }
+        .flowOn(Dispatchers.IO) // --- CRITICAL: Pushes the matrix math off the UI thread ---
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GalleryUiState.Empty)
 
     fun handleUiEvent(event: GalleryUiEvent) {
         when (event) {

@@ -1,17 +1,17 @@
 /*
- *   Copyright 2020–2026 Leon Latsch
+ * Copyright 2020–2026 Leon Latsch
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.app.galleryx.model.database
@@ -31,7 +31,7 @@ import com.app.galleryx.model.database.entity.AlbumTable
 import com.app.galleryx.model.database.entity.Photo
 import com.app.galleryx.model.database.ref.AlbumPhotoCrossRefTable
 
-private const val DATABASE_VERSION = 5
+private const val DATABASE_VERSION = 6 // BUMPED TO 6 FOR AI EMBEDDINGS
 const val DATABASE_NAME = "photok.db"
 
 /**
@@ -66,6 +66,12 @@ const val DATABASE_NAME = "photok.db"
             from = 4,
             to = 5,
         ),
+        // --- NEW ADDITION FOR AI INDEXING ---
+        AutoMigration(
+            from = 5,
+            to = 6,
+        )
+        // ------------------------------------
     ]
 )
 @TypeConverters(Converters::class)

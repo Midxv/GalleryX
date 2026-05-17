@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
@@ -31,15 +32,25 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import com.app.galleryx.R
 import com.app.galleryx.databinding.ActivityMainBinding
 import com.app.galleryx.main.ui.navigation.MainMenu
+import com.app.galleryx.model.database.dao.PhotoDao
+import com.app.galleryx.search.SearchEngine
 import com.app.galleryx.settings.data.Config
 import com.app.galleryx.ui.theme.AppTheme
 import com.app.galleryx.uicomponnets.bindings.BindableActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -54,11 +65,80 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
     @Inject
     override lateinit var config: Config
 
+    // --- Injected AI Engine and Database ---
+    @Inject
+    lateinit var photoDao: PhotoDao
+
+    @Inject
+    lateinit var searchEngine: SearchEngine
+
     var onOrientationChanged: (Int) -> Unit = {} // Init empty
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Launch the high-speed foreground AI indexer
+        lifecycleScope.launch {
+            // This ensures the AI ONLY runs when the app is actively on screen.
+            // Swiping home instantly pauses it. Opening the app instantly resumes it.
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                runForegroundFastIndexing()
+            }
+        }
+    }
+
+    /**
+     * Pulls unindexed photos and processes them immediately using exactly 3 concurrent threads.
+     */
+    private suspend fun runForegroundFastIndexing() = withContext(Dispatchers.IO) {
+        // Fetch all unindexed items from the database
+        val allUnindexed = photoDao.getUnindexedPhotos()
+
+        // STRICT FILTER: Since photo.type is likely an Int, we filter by filename extensions.
+        // This is 100% crash-proof and guarantees we only send valid media to the AI.
+        val validExtensions = listOf(".jpg", ".jpeg", ".png", ".webp", ".heic", ".mp4", ".mkv", ".gif")
+
+        val mediaToIndex = allUnindexed.filter { photo ->
+            // Convert to lowercase safely in case fileName is somehow null
+            val fileName = photo.fileName?.lowercase() ?: ""
+            validExtensions.any { ext -> fileName.endsWith(ext) }
+        }
+
+        Log.d("AI_INDEXER", "Found ${mediaToIndex.size} unindexed images/videos to process.")
+
+        if (mediaToIndex.isEmpty()) {
+            return@withContext // Everything valid is indexed!
+        }
+
+        // Restrict inference to exactly 3 concurrent threads to prevent RAM spikes
+        val concurrencySemaphore = Semaphore(3)
+
+        mediaToIndex.forEach { mediaItem ->
+            // Check if the user minimized the app. If they did, stop looping immediately.
+            ensureActive()
+
+            concurrencySemaphore.acquire()
+            launch {
+                try {
+                    Log.d("AI_INDEXER", "Attempting to index: ${mediaItem.fileName}")
+
+                    val embedding = searchEngine.indexPhoto(mediaItem)
+
+                    if (embedding != null) {
+                        mediaItem.embedding = embedding
+                        photoDao.insert(mediaItem) // Save mathematical vector to DB
+                        Log.d("AI_INDEXER", "SUCCESS: Indexed ${mediaItem.fileName}")
+                    } else {
+                        Log.e("AI_INDEXER", "FAILED: indexPhoto returned null for ${mediaItem.fileName}.")
+                    }
+                } catch (e: Exception) {
+                    Log.e("AI_INDEXER", "CRASH during indexing ${mediaItem.fileName}", e)
+                } finally {
+                    concurrencySemaphore.release()
+                }
+            }
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -127,7 +207,7 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
                             val navController = findNavController(R.id.mainNavHostFragment)
                             if (navController.currentDestination?.id != fragmentId) {
 
-                                // Removed custom fading animations to ensure instant, stutter-free tab switching
+                                // Instant tab switching configuration
                                 val navOptions = NavOptions.Builder()
                                     .setLaunchSingleTop(true)
                                     .setRestoreState(true)
@@ -138,7 +218,6 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
                             }
                         },
                         onSearchClicked = {
-                            // CONNECTED TO MAIN VIEW MODEL
                             viewModel.toggleSearchVisibility()
                         }
                     )
