@@ -1,4 +1,3 @@
-
 <p align="center">
   <img src="Public/assets/applogo.png" alt="GalleryX Logo" width="120"/>
 </p>
@@ -35,6 +34,18 @@ No external API calls.
 No telemetry collection.
 
 All processing, indexing, encryption, and search operations remain local to the device.
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="Public/assets/Screenshot_2026-03-06-00-34-09-585_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-35-52-537_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-35-58-520_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-36-56-136_com.app.galleryx.foss.jpg" width="19%" />
+  <img src="Public/assets/Screenshot_2026-03-06-00-37-14-467_com.app.galleryx.foss.jpg" width="19%" />
+</p>
 
 ---
 
@@ -99,7 +110,7 @@ Example queries:
 
 ```bash
 git clone https://github.com/Midxv/GalleryX.git
-````
+```
 
 Open the project in Android Studio and allow Gradle sync to complete.
 
@@ -115,13 +126,13 @@ You must manually add the required model files before building the project.
 
 Download the following from the Hugging Face CLIP ONNX repository:
 
-* `vision_model.onnx`
-* `text_model.onnx`
-* `vocab.json`
+- `vision_model.onnx`
+- `text_model.onnx`
+- `vocab.json`
 
 Recommended source:
 
-[https://huggingface.co/Xenova/clip-vit-base-patch32](https://huggingface.co/Xenova/clip-vit-base-patch32)
+https://huggingface.co/Xenova/clip-vit-base-patch32
 
 ### Placement
 
@@ -170,4 +181,3 @@ Or directly build and run from Android Studio.
 Licensed under the MIT License.
 
 See the [LICENSE](LICENSE) file for details.
-
