@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GalleryX | Secure Offline Vault</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --surface-color: #161b22;
+            --surface-border: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent-glow: rgba(88, 166, 255, 0.4);
+            --button-bg: #238636;
+            --button-hover: #2ea043;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- Animations --- */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 40px var(--accent-glow); }
+            100% { box-shadow: 0 0 20px var(--accent-glow); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(circle at center, #1f242c 0%, var(--bg-color) 70%);
+        }
+
+        .app-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 25%;
+            margin-bottom: 2rem;
+            animation: float 6s ease-in-out infinite, pulse-glow 3s infinite;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            background: linear-gradient(180deg, #fff, #8b949e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        /* --- Features Grid --- */
+        .features-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-color: #58a6ff;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #58a6ff;
+        }
+
+        /* --- Swipeable Screenshots --- */
+        .screenshots-section {
+            padding: 4rem 0;
+            text-align: center;
+            background-color: #090c10;
+        }
+
+        .screenshots-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .carousel-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        /* Hide Scrollbar */
+        .carousel-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-wrapper {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .carousel-item {
+            scroll-snap-align: center;
+            flex: 0 0 auto;
+            width: 280px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 4px solid var(--surface-border);
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-item:hover {
+            transform: scale(1.05);
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* --- Big Download Section --- */
+        .download-section {
+            padding: 6rem 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .download-section h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--button-bg);
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 1.5rem 4rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(35, 134, 54, 0.3);
+        }
+
+        .download-btn:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(35, 134, 54, 0.5);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: #010409;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--surface-border);
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-link {
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<section class="hero fade-in">
+    <img src="../Public/assets/applogo.jpg" alt="GalleryX Logo" class="app-logo" onerror="this.src='https://via.placeholder.com/150/161b22/58a6ff?text=GalleryX'">
+    <h1>GalleryX</h1>
+    <p>Absolute Data Sovereignty. A completely offline, encrypted vault with semantic AI search.</p>
+</section>
+
+<section class="features-container">
+    <div class="feature-card fade-in">
+        <h3>Military Encryption</h3>
+        <p>AES-256 local storage encryption. Media is decrypted seamlessly in volatile RAM, leaving zero trace on public storage.</p>
+    </div>
+    <div class="feature-card fade-in">
+        <h3>Offline AI Search</h3>
+        <p>Search your encrypted files using natural language. Powered by an isolated ONNX neural network right on your device.</p>
+    </div>
+    <div class="feature-card fade-in">
+        <h3>Stealth Access</h3>
+        <p>Hide the app icon entirely. Launch your vault securely by entering a secret code into your phone's native dialer.</p>
+    </div>
+</section>
+
+<section class="screenshots-section fade-in">
+    <h2>See It In Action</h2>
+    <div class="carousel-wrapper">
+        <div class="carousel-item">
+            <img src="../Public/assets/Screenshot_2026-03-06-00-34-09-585_com.app.galleryx.foss.jpg" alt="GalleryX Screenshot 1" onerror="this.src='https://via.placeholder.com/280x600/161b22/58a6ff?text=UI+Screen+1'">
+        </div>
+        <div class="carousel-item">
+            <img src="../Public/assets/Screenshot_2026-03-06-00-35-52-537_com.app.galleryx.foss.jpg" alt="GalleryX Screenshot 2" onerror="this.src='https://via.placeholder.com/280x600/161b22/58a6ff?text=UI+Screen+2'">
+        </div>
+        <div class="carousel-item">
+            <img src="../Public/assets/Screenshot_2026-03-06-00-35-58-520_com.app.galleryx.foss.jpg" alt="GalleryX Screenshot 3" onerror="this.src='https://via.placeholder.com/280x600/161b22/58a6ff?text=UI+Screen+3'">
+        </div>
+        <div class="carousel-item">
+            <img src="../Public/assets/Screenshot_2026-03-06-00-36-56-136_com.app.galleryx.foss.jpg" alt="GalleryX Screenshot 4" onerror="this.src='https://via.placeholder.com/280x600/161b22/58a6ff?text=UI+Screen+4'">
+        </div>
+        <div class="carousel-item">
+            <img src="../Public/assets/Screenshot_2026-03-06-00-37-14-467_com.app.galleryx.foss.jpg" alt="GalleryX Screenshot 5" onerror="this.src='https://via.placeholder.com/280x600/161b22/58a6ff?text=UI+Screen+5'">
+        </div>
+    </div>
+</section>
+
+<section class="download-section fade-in">
+    <h2>Ready to secure your media?</h2>
+    <a href="https://github.com/Midxv/GalleryX/releases/latest" class="download-btn">
+        Download v4.0.1 APK
+    </a>
+</section>
+
+<footer>
+    <p>Built with precision by Asif Middya.</p>
+    <p>&copy; 2026 GalleryX. Open Source and telemetry-free.</p>
+    <p><a href="https://github.com/Midxv/GalleryX" class="footer-link">View Source Code on GitHub</a></p>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+</html>
