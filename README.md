@@ -165,26 +165,6 @@ Or directly build and run from Android Studio.
 
 ---
 
-## Security Notes
-
-* Media never leaves the device
-* Encryption keys are stored using Android Keystore
-* Decrypted files are not written back to public storage
-* Search indexing runs locally without internet access
-
----
-
-## Roadmap
-
-* Video semantic search
-* Encrypted cloud sync
-* Multi-vault support
-* Secure sharing
-* GPU accelerated inference
-* Full Compose migration
-
----
-
 ## License
 
 Licensed under the MIT License.
