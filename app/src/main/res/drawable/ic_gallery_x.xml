@@ -1,0 +1,63 @@
+<!--
+  ~   Copyright 2020-2026 Leon Latsch
+  ~
+  ~   Licensed under the Apache License, Version 2.0 (the "License");
+  ~   you may not use this file except in compliance with the License.
+  ~   You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~   Unless required by applicable law or agreed to in writing, software
+  ~   distributed under the License is distributed on an "AS IS" BASIS,
+  ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~   See the License for the specific language governing permissions and
+  ~   limitations under the License.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+
+    <!-- Background -->
+    <path
+        android:fillColor="#F4F1EC"
+        android:pathData="M180,80H844C918,80 944,106 944,180V844C944,918 918,944 844,944H180C106,944 80,918 80,844V180C80,106 106,80 180,80Z" />
+
+    <!-- Sun -->
+    <path
+        android:fillColor="#FFB347"
+        android:pathData="M710,228A72,72 0,1 1,709.9 228Z" />
+
+    <!-- Large Mountain -->
+    <path
+        android:fillColor="#5B7FFF"
+        android:pathData="M184,610L360,392C388,354 438,354 466,392L642,610C668,646 642,694 592,694H234C184,694 158,646 184,610Z" />
+
+    <!-- Small Mountain -->
+    <path
+        android:fillColor="#FF7DA8"
+        android:pathData="M468,620L610,472C636,444 682,444 708,472L816,584C846,618 824,672 778,672H514C468,672 442,650 468,620Z" />
+
+    <!-- Reflection Line 1 -->
+    <path
+        android:fillColor="#8C96FF"
+        android:pathData="M228,724H796A12,12 0,0 1,808 736A12,12 0,0 1,796 748H228A12,12 0,0 1,216 736A12,12 0,0 1,228 724Z" />
+
+    <!-- Reflection Line 2 -->
+    <path
+        android:fillColor="#AEB5FF"
+        android:pathData="M324,780H700A12,12 0,0 1,712 792A12,12 0,0 1,700 804H324A12,12 0,0 1,312 792A12,12 0,0 1,324 780Z" />
+
+    <!-- Reflection Line 3 -->
+    <path
+        android:fillColor="#C8C2FF"
+        android:pathData="M432,836H592A12,12 0,0 1,604 848A12,12 0,0 1,592 860H432A12,12 0,0 1,420 848A12,12 0,0 1,432 836Z" />
+
+    <!-- Bottom Dot -->
+    <path
+        android:fillColor="#CFC9FF"
+        android:pathData="M512,894A12,12 0,1 1,511.9 894Z" />
+
+</vector>

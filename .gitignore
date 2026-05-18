@@ -12,3 +12,8 @@
 .kotlin/
 
 kls_database.db
+
+# Ignore APK and AAB build files
+*.apk
+*.ap_
+*.aab
