@@ -80,7 +80,8 @@ fun PhotoGallery(
     onImportChoice: (ImportChoice) -> Unit,
     additionalMultiSelectionActions: @Composable (ColumnScope.() -> Unit),
     modifier: Modifier = Modifier,
-    showImportButton: Boolean = true, // Added to toggle import button per screen
+    showImportButton: Boolean = true,
+    onShare: () -> Unit = {} // --- NEW: Added Share callback ---
 ) {
     val activity = LocalActivity.current
     var importMenuBottomSheetVisible by remember { mutableStateOf(false) }
@@ -114,7 +115,6 @@ fun PhotoGallery(
             transformableState = transformableState
         )
 
-        // Only show the import button if requested (Hidden in All Files)
         if (showImportButton) {
             Box(
                 modifier = Modifier
@@ -179,7 +179,7 @@ fun PhotoGallery(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(bottom = 120.dp), // Safely cushions above floating navbar
+                .padding(bottom = 120.dp),
             multiSelectionState = multiSelectionState,
         ) {
             DropdownMenuItem(
@@ -198,6 +198,17 @@ fun PhotoGallery(
                     multiSelectionState.dismissMore()
                 },
             )
+
+            // --- NEW: Share Button ---
+            DropdownMenuItem(
+                leadingIcon = { Icon(painter = painterResource(android.R.drawable.ic_menu_share), contentDescription = null) }, // Using a default Android share icon to prevent crash
+                text = { Text("Share") },
+                onClick = {
+                    onShare()
+                    multiSelectionState.dismissMore()
+                },
+            )
+
             DropdownMenuItem(
                 leadingIcon = { Icon(painter = painterResource(R.drawable.ic_export), contentDescription = null) },
                 text = { Text(stringResource(R.string.common_export)) },

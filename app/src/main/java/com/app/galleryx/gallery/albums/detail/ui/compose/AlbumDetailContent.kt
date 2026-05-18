@@ -1,17 +1,5 @@
 /*
  * Copyright 2020–2026 GalleryX
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package com.app.galleryx.gallery.albums.detail.ui.compose
@@ -98,13 +86,7 @@ private fun AlbumsDetailScreenPreview() {
                 "Album Name",
                 listOf(
                     PhotoTile("file1", PhotoType.JPEG, "uuid1", 1024, System.currentTimeMillis()),
-                    PhotoTile("file2", PhotoType.JPEG, "uuid2", 2048, System.currentTimeMillis()),
-                    PhotoTile("file3", PhotoType.JPEG, "uuid3", 4096, System.currentTimeMillis()),
-                    PhotoTile("file4", PhotoType.JPEG, "uuid4", 8192, System.currentTimeMillis()),
-                    PhotoTile("file5", PhotoType.JPEG, "uuid5", 16384, System.currentTimeMillis()),
-                    PhotoTile("file6", PhotoType.JPEG, "uuid6", 32768, System.currentTimeMillis()),
-                    PhotoTile("file7", PhotoType.JPEG, "uuid7", 65536, System.currentTimeMillis()),
-                    PhotoTile("file8", PhotoType.JPEG, "uuid8", 131072, System.currentTimeMillis()),
+                    PhotoTile("file2", PhotoType.JPEG, "uuid2", 2048, System.currentTimeMillis())
                 )
             ),
             handleUiEvent = {},

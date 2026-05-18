@@ -1,63 +1,193 @@
+
 <p align="center">
-  <img src="Public/assets/applogo.jpg" alt="GalleryX Logo" width="150"/>
+  <img src="Public/assets/applogo.jpg" alt="GalleryX Logo" width="120"/>
 </p>
 
 <h1 align="center">GalleryX</h1>
 
 <p align="center">
-  <strong>A highly secure, privacy-first photo and video vault for Android.</strong>
+  Privacy-first offline media vault for Android
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Platform">
-  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin">
-  <img src="https://img.shields.io/badge/Architecture-MVVM-blue" alt="Architecture">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  <a href="https://github.com/Midxv/GalleryX/releases">
+    <img src="https://img.shields.io/github/v/release/Midxv/GalleryX?style=flat-square" alt="Release">
+  </a>
+  <a href="https://github.com/Midxv/GalleryX/stargazers">
+    <img src="https://img.shields.io/github/stars/Midxv/GalleryX?style=flat-square" alt="Stars">
+  </a>
+  <a href="https://github.com/Midxv/GalleryX/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Midxv/GalleryX?style=flat-square" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Kotlin-100%25-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin">
 </p>
 
 ---
 
-## 📖 About GalleryX
-GalleryX is a robust Android application designed to keep your personal media truly private. Built with modern Android development practices, it encrypts your photos and videos locally, ensuring that no one can access your private moments without your permission.
+## Overview
 
-Whether you need to hide sensitive documents, personal photos, or private videos, GalleryX provides bank-grade encryption paired with an intuitive, fluid user interface.
+GalleryX is a fully offline, privacy-focused media vault built for Android.  
+It encrypts photos and videos locally using AES-256 encryption while providing AI-powered semantic search that runs entirely on-device.
 
-## ✨ Key Features
-* **🔒 AES-256 Encryption:** Your media is fully encrypted on your local storage. No cloud leaks, no unauthorized access.
-* **👻 Stealth Mode / App Hiding:** Disguise the app or hide it entirely from the launcher. Launch it via a secret dialer code.
-* **👆 Biometric Unlock:** Quickly and securely access your vault using your device's fingerprint or face unlock.
-* **📁 Smart Album Management:** Organize your encrypted photos and videos into custom albums.
-* **☁️ Encrypted Backups:** Safely backup and restore your encrypted vault so you never lose your memories.
-* **🎥 Built-in Media Player:** View your photos and stream your encrypted videos directly inside the app without decrypting them to public storage first.
+No cloud sync.  
+No external API calls.  
+No telemetry collection.
 
-## 📱 Screenshots
+All processing, indexing, encryption, and search operations remain local to the device.
 
-<p align="center">
-  <img src="Public/assets/Screenshot_2026-03-06-00-34-09-585_com.app.galleryx.foss.jpg" width="19%" />
-  <img src="Public/assets/Screenshot_2026-03-06-00-35-52-537_com.app.galleryx.foss.jpg" width="19%" />
-  <img src="Public/assets/Screenshot_2026-03-06-00-35-58-520_com.app.galleryx.foss.jpg" width="19%" />
-  <img src="Public/assets/Screenshot_2026-03-06-00-36-56-136_com.app.galleryx.foss.jpg" width="19%" />
-  <img src="Public/assets/Screenshot_2026-03-06-00-37-14-467_com.app.galleryx.foss.jpg" width="19%" />
-</p>
+---
 
-## 🛠️ Tech Stack & Architecture
-GalleryX is built using the latest Android development standards:
-* **Language:** [Kotlin](https://kotlinlang.org/) (100%)
-* **UI Toolkit:** Jetpack Compose & XML (Hybrid approach)
-* **Architecture:** MVVM (Model-View-ViewModel)
-* **Local Database:** Room Database
-* **Concurrency:** Kotlin Coroutines & Flow
-* **Dependency Injection:** Dagger Hilt
-* **Security:** Android Keystore System, BiometricPrompt API, AES Encryption
+## Features
 
-## 🚀 Getting Started
+### Secure Media Storage
 
-### Prerequisites
-* Android Studio (Latest Version)
-* JDK 17+
-* Minimum SDK: 24 (Android 7.0)
+- AES-256 encryption for all stored media
+- Android Keystore integration for secure key management
+- In-memory media decryption during playback
+- Encrypted vault backup and restore support
 
-### Building the Project
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/Midxv/GalleryX.git](https://github.com/Midxv/GalleryX.git)
+### On-Device AI Search
+
+- Natural language image search
+- CLIP-based semantic understanding
+- ONNX Runtime local inference
+- Vector similarity matching using cosine similarity
+
+Example queries:
+
+- `dog playing on beach`
+- `car at night`
+- `documents on desk`
+
+### Privacy & Access Control
+
+- Fully offline architecture
+- No analytics or tracking
+- Optional hidden launcher mode
+- Biometric authentication using Android BiometricPrompt API
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Language | Kotlin |
+| Architecture | MVVM |
+| UI | Jetpack Compose + XML |
+| Database | Room |
+| Dependency Injection | Dagger Hilt |
+| Concurrency | Kotlin Coroutines + Flow |
+| AI Runtime | ONNX Runtime |
+| Encryption | AES-256 |
+
+---
+
+## Requirements
+
+- Android Studio (latest stable recommended)
+- JDK 17+
+- Android SDK 24+
+- Git
+
+---
+
+## Setup
+
+### Clone Repository
+
+```bash
+git clone https://github.com/Midxv/GalleryX.git
+````
+
+Open the project in Android Studio and allow Gradle sync to complete.
+
+---
+
+## AI Model Setup
+
+The ONNX models are not included in the repository because of file size limitations.
+
+You must manually add the required model files before building the project.
+
+### Required Files
+
+Download the following from the Hugging Face CLIP ONNX repository:
+
+* `vision_model.onnx`
+* `text_model.onnx`
+* `vocab.json`
+
+Recommended source:
+
+[https://huggingface.co/Xenova/clip-vit-base-patch32](https://huggingface.co/Xenova/clip-vit-base-patch32)
+
+### Placement
+
+Place the files inside:
+
+```text
+app/src/main/assets/
+```
+
+Final structure:
+
+```text
+app/
+└── src/
+    └── main/
+        └── assets/
+            ├── vision_model.onnx
+            ├── text_model.onnx
+            └── vocab.json
+```
+
+---
+
+## Build
+
+After adding the models:
+
+### Clean Project
+
+```bash
+./gradlew clean
+```
+
+### Build APK
+
+```bash
+./gradlew assembleDebug
+```
+
+Or directly build and run from Android Studio.
+
+---
+
+## Security Notes
+
+* Media never leaves the device
+* Encryption keys are stored using Android Keystore
+* Decrypted files are not written back to public storage
+* Search indexing runs locally without internet access
+
+---
+
+## Roadmap
+
+* Video semantic search
+* Encrypted cloud sync
+* Multi-vault support
+* Secure sharing
+* GPU accelerated inference
+* Full Compose migration
+
+---
+
+## License
+
+Licensed under the MIT License.
+
+See the [LICENSE](LICENSE) file for details.
+

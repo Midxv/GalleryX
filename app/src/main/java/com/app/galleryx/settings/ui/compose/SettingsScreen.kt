@@ -117,13 +117,11 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-    // Device Admin Setup for Uninstall Protection
     val devicePolicyManager = remember { context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager }
     val adminComponent = remember { ComponentName(context, UninstallProtectionReceiver::class.java) }
     val config = remember { Config(context) }
 
     val deviceAdminLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
-        // Sync config after user returns from the system prompt
         val isActive = devicePolicyManager.isAdminActive(adminComponent)
         config.securityUninstallProtection = isActive
     }
@@ -137,28 +135,24 @@ fun SettingsCallbacks(viewModel: SettingsViewModel) {
     LaunchedEffect(Unit) {
         fragment ?: return@LaunchedEffect
 
-        // NEW: Disguise App Callback
         viewModel.registerPreferenceCallback(Config.SECURITY_DISGUISE_APP) { value ->
             val enable = value as Boolean
             viewModel.toggleDisguiseApp(enable)
             true
         }
 
-        // Uninstall Protection Callback
         viewModel.registerPreferenceCallback(Config.SECURITY_UNINSTALL_PROTECTION) { value ->
             val enable = value as Boolean
             val isActive = devicePolicyManager.isAdminActive(adminComponent)
 
             if (enable && !isActive) {
-                // Launch system prompt
                 val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
                     putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent)
                     putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.device_admin_description))
                 }
                 deviceAdminLauncher.launch(intent)
-                false // wait for result
+                false
             } else if (!enable && isActive) {
-                // Remove Device Admin
                 devicePolicyManager.removeActiveAdmin(adminComponent)
                 config.securityUninstallProtection = false
                 true
@@ -268,11 +262,11 @@ fun SettingsContent(
     val context = LocalContext.current
     val config = remember { Config(context) }
 
-    // Read initial states directly from our updated Config.kt
-    var hideAllFiles by remember { mutableStateOf(config.galleryHideAllFilesMenu) }
-    var hideSearch by remember { mutableStateOf(config.galleryHideSearchIcon) }
+    // --- REAL STATE VARIABLES TIED TO CONFIG ---
     var uninstallProtection by remember { mutableStateOf(config.securityUninstallProtection) }
-    var disguiseApp by remember { mutableStateOf(config.securityDisguiseApp) } // NEW
+    var disguiseApp by remember { mutableStateOf(config.securityDisguiseApp) }
+    var aiSearchEnabled by remember { mutableStateOf(config.galleryAiSearchEnabled) }
+    var showHiddenAlbums by remember { mutableStateOf(config.galleryShowHiddenAlbums) }
 
     AppTheme {
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -310,47 +304,51 @@ fun SettingsContent(
             ) {
 
                 // ==========================================
-                // CUSTOM UI: App Customization Toggles
+                // CUSTOM UI: AI Learning
                 // ==========================================
-                CustomSectionView(title = "App Customization") {
-                    PreferenceView(
-                        icon = painterResource(R.drawable.ic_folder),
-                        title = "Hide All Files Menu",
-                        summary = "Removes the 'All Files' tab from the bottom navigation.",
-                        trailing = {
-                            Switch(
-                                checked = hideAllFiles,
-                                onCheckedChange = { isChecked ->
-                                    hideAllFiles = isChecked
-                                    config.galleryHideAllFilesMenu = isChecked
-                                }
-                            )
-                        },
-                        onClick = {
-                            hideAllFiles = !hideAllFiles
-                            config.galleryHideAllFilesMenu = hideAllFiles
-                        }
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
-                    )
+                CustomSectionView(title = "AI Learning") {
                     PreferenceView(
                         icon = painterResource(android.R.drawable.ic_menu_search),
-                        title = "Hide Search Icon",
-                        summary = "Removes the search button from the top app bar.",
+                        title = "Enable AI Search",
+                        summary = "Use on-device AI to understand and search for objects, concepts, and scenes in your vault.",
                         trailing = {
                             Switch(
-                                checked = hideSearch,
+                                checked = aiSearchEnabled,
                                 onCheckedChange = { isChecked ->
-                                    hideSearch = isChecked
-                                    config.galleryHideSearchIcon = isChecked
+                                    aiSearchEnabled = isChecked
+                                    config.galleryAiSearchEnabled = isChecked // --- WIRED TO CONFIG ---
                                 }
                             )
                         },
                         onClick = {
-                            hideSearch = !hideSearch
-                            config.galleryHideSearchIcon = hideSearch
+                            val newValue = !aiSearchEnabled
+                            aiSearchEnabled = newValue
+                            config.galleryAiSearchEnabled = newValue // --- WIRED TO CONFIG ---
+                        }
+                    )
+                }
+
+                // ==========================================
+                // CUSTOM UI: Album Hide
+                // ==========================================
+                CustomSectionView(title = "Album Hide") {
+                    PreferenceView(
+                        icon = painterResource(R.drawable.ic_eye_closed), // Switched to the eye icon for better context
+                        title = "Show Hidden Albums",
+                        summary = "Temporarily reveal albums you have previously hidden.",
+                        trailing = {
+                            Switch(
+                                checked = showHiddenAlbums,
+                                onCheckedChange = { isChecked ->
+                                    showHiddenAlbums = isChecked
+                                    config.galleryShowHiddenAlbums = isChecked // --- WIRED TO CONFIG ---
+                                }
+                            )
+                        },
+                        onClick = {
+                            val newValue = !showHiddenAlbums
+                            showHiddenAlbums = newValue
+                            config.galleryShowHiddenAlbums = newValue // --- WIRED TO CONFIG ---
                         }
                     )
                 }
@@ -399,7 +397,6 @@ fun SettingsContent(
                         }
                     )
 
-                    // NEW: Disguise App Toggle
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 56.dp),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
@@ -506,7 +503,6 @@ fun SettingsContent(
     }
 }
 
-// Custom Section wrapper to handle hardcoded Strings without needing string resources (R.string...)
 @Composable
 fun CustomSectionView(
     title: String,

@@ -33,7 +33,8 @@ import com.app.galleryx.gallery.ui.navigation.PhotoAction
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.DeletePhotos
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.ExportPhotos
 import com.app.galleryx.gallery.ui.navigation.PhotoAction.OpenPhoto
-import com.app.galleryx.search.SearchEngine // --- ADDED IMPORT ---
+import com.app.galleryx.search.SearchEngine
+import com.app.galleryx.settings.data.Config // --- INJECTED CONFIG ---
 import com.app.galleryx.sort.domain.SortConfig
 import com.app.galleryx.sort.domain.SortRepository
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn // --- ADDED IMPORT ---
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -56,7 +57,8 @@ class AlbumDetailViewModel @AssistedInject constructor(
     private val albumsRepository: AlbumRepository,
     private val sortRepository: SortRepository,
     private val resources: Resources,
-    private val searchEngine: SearchEngine // --- NEW: Injected AI Engine ---
+    private val searchEngine: SearchEngine,
+    private val config: Config // --- NEW: Added Config ---
 ) : ViewModel() {
 
     private val sortFlow = sortRepository.observeSortFor(albumUuid = albumUUID, default = SortConfig.Album.default)
@@ -76,27 +78,29 @@ class AlbumDetailViewModel @AssistedInject constructor(
         searchQuery
     ) { album, sort, query ->
 
-        // --- NEW: Universal AI Search Block ---
         val filteredFiles = if (query.isNotBlank()) {
-            val queryVector = searchEngine.getQueryEmbedding(query)
+            // --- AI KILL SWITCH ---
+            if (config.galleryAiSearchEnabled) {
+                val queryVector = searchEngine.getQueryEmbedding(query)
 
-            if (queryVector != null) {
-                // 1. Calculate Cosine Similarity against photos ONLY IN THIS ALBUM
-                val scoredPhotos = album.files.mapNotNull { photo ->
-                    photo.embedding?.let { embeddingBytes ->
-                        val photoVector = searchEngine.byteArrayToFloatArray(embeddingBytes)
-                        val score = searchEngine.cosineSimilarity(queryVector, photoVector)
-                        Pair(photo, score)
+                if (queryVector != null) {
+                    val scoredPhotos = album.files.mapNotNull { photo ->
+                        photo.embedding?.let { embeddingBytes ->
+                            val photoVector = searchEngine.byteArrayToFloatArray(embeddingBytes)
+                            val score = searchEngine.cosineSimilarity(queryVector, photoVector)
+                            Pair(photo, score)
+                        }
                     }
-                }
 
-                // 2. Filter out weak matches and sort by highest similarity
-                scoredPhotos
-                    .filter { it.second > 0.22f }
-                    .sortedByDescending { it.second }
-                    .map { it.first }
+                    scoredPhotos
+                        .filter { it.second > 0.22f }
+                        .sortedByDescending { it.second }
+                        .map { it.first }
+                } else {
+                    album.files.filter { it.fileName.contains(query, ignoreCase = true) }
+                }
             } else {
-                // Fallback to basic filename search
+                // Pure text fallback if AI is disabled
                 album.files.filter { it.fileName.contains(query, ignoreCase = true) }
             }
         } else {
@@ -112,14 +116,14 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     type = it.type,
                     uuid = it.uuid,
                     fileSize = it.size,
-                    dateTaken = it.importedAt // Added for Date Headers
+                    dateTaken = it.importedAt
                 )
             },
             sort = sort,
             searchQuery = query
         )
     }
-        .flowOn(Dispatchers.IO) // --- CRITICAL: Matrix math runs on background thread ---
+        .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AlbumDetailUiState())
 
 
@@ -153,20 +157,26 @@ class AlbumDetailViewModel @AssistedInject constructor(
                 viewModelScope.launch {
                     albumsRepository.deleteAlbum(albumFlow.value)
                         .onSuccess {
-                            navEventsChannel.trySend(
-                                ShowToast(
-                                    resources.getString(R.string.gallery_albums_deleted)
-                                )
-                            )
+                            navEventsChannel.trySend(ShowToast(resources.getString(R.string.gallery_albums_deleted)))
                             navEventsChannel.trySend(AlbumDetailNavigator.NavigationEvent.Close)
                         }
                         .onFailure {
-                            navEventsChannel.trySend(
-                                ShowToast(
-                                    resources.getString(R.string.common_error)
-                                )
-                            )
+                            navEventsChannel.trySend(ShowToast(resources.getString(R.string.common_error)))
                         }
+                }
+            }
+
+            // --- NEW: THE HIDE LOGIC ---
+            AlbumDetailUiEvent.HideAlbum -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    // Grab current hidden set, add this album, and save it back
+                    val currentHidden = config.galleryHiddenAlbums.toMutableSet()
+                    currentHidden.add(albumFlow.value.uuid)
+                    config.galleryHiddenAlbums = currentHidden
+
+                    // Show a toast and kick the user back to the main menu
+                    navEventsChannel.trySend(ShowToast("Album Hidden"))
+                    navEventsChannel.trySend(AlbumDetailNavigator.NavigationEvent.Close)
                 }
             }
 
@@ -175,11 +185,7 @@ class AlbumDetailViewModel @AssistedInject constructor(
                     if (event.targetAlbumUuid != albumFlow.value.uuid) {
                         albumsRepository.link(event.items, event.targetAlbumUuid)
                         albumsRepository.unlink(event.items, albumFlow.value.uuid)
-                        navEventsChannel.trySend(
-                            ShowToast(
-                                resources.getString(R.string.gallery_albums_moved)
-                            )
-                        )
+                        navEventsChannel.trySend(ShowToast(resources.getString(R.string.gallery_albums_moved)))
                     }
                 }
             }

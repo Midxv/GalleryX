@@ -41,7 +41,6 @@ fun GalleryContent(
     Column(modifier = modifier.fillMaxSize()) {
 
         // --- 1. THE AI INDEXING PROGRESS BAR ---
-        // Only shows up if there is active indexing happening in the background
         if (uiState.totalCount > 0 && uiState.indexedCount < uiState.totalCount) {
             val progress = uiState.indexedCount.toFloat() / uiState.totalCount.toFloat()
             Column(
@@ -85,6 +84,12 @@ fun GalleryContent(
             onDelete = {
                 handleUiEvent(GalleryUiEvent.OnDelete(multiSelectionState.selectedItems.value.toList()))
             },
+
+            // --- NEW: Handle the Share button click ---
+            onShare = {
+                handleUiEvent(GalleryUiEvent.OnShare(multiSelectionState.selectedItems.value.toList()))
+            },
+
             onImportChoice = { handleUiEvent(GalleryUiEvent.OnImportChoice(it)) },
             additionalMultiSelectionActions = {
                 DropdownMenuItem(

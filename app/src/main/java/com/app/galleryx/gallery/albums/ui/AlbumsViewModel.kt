@@ -22,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import com.app.galleryx.gallery.albums.domain.AlbumRepository
 import com.app.galleryx.gallery.albums.ui.compose.AlbumsUiState
 import com.app.galleryx.gallery.albums.ui.navigation.AlbumsNavigationEvent
+import com.app.galleryx.settings.data.Config // --- 1. ADDED CONFIG IMPORT ---
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +37,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AlbumsViewModel @Inject constructor(
     private val albumsRepositoryImpl: AlbumRepository,
-    private val albumUiStateFactory: AlbumUiStateFactory
+    private val albumUiStateFactory: AlbumUiStateFactory,
+    private val config: Config // --- 2. INJECTED CONFIG ---
 ) : ViewModel() {
 
     private val showCreateDialog = MutableStateFlow(false)
@@ -47,11 +49,22 @@ class AlbumsViewModel @Inject constructor(
         showCreateDialog,
         searchQuery
     ) { albums, showCreateDialog, query ->
-        var filteredAlbums = albums
 
-        // Purely filter by the Album name
+        // --- 3. THE VANISHING ACT (HIDE ALBUMS) ---
+        // Check the master switch and the hidden list from your Settings
+        val showHiddenAlbums = config.galleryShowHiddenAlbums
+        val hiddenUuids = config.galleryHiddenAlbums
+
+        // If the master switch is OFF, filter out any album whose UUID is in the hidden list
+        var filteredAlbums = if (showHiddenAlbums) {
+            albums
+        } else {
+            albums.filter { it.uuid !in hiddenUuids }
+        }
+
+        // 4. Purely filter by the Album name (using our newly filtered list)
         if (query.isNotBlank()) {
-            filteredAlbums = albums.filter { it.name.contains(query, ignoreCase = true) }
+            filteredAlbums = filteredAlbums.filter { it.name.contains(query, ignoreCase = true) }
         }
 
         val state = albumUiStateFactory.create(filteredAlbums, showCreateDialog)

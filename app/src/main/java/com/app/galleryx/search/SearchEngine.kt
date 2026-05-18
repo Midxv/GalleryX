@@ -19,6 +19,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 class SearchEngine @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -26,31 +27,27 @@ class SearchEngine @Inject constructor(
 ) {
     private val env: OrtEnvironment = OrtEnvironment.getEnvironment()
 
-    // Nullable so they aren't forced to load instantly on the Main UI Thread
     private var visionSession: OrtSession? = null
     private var textSession: OrtSession? = null
     private var vocab: Map<String, Int> = emptyMap()
 
-    /**
-     * Safely copies assets to cache and loads them into ONNX via file paths (Memory Mapping).
-     * This prevents OutOfMemory errors and keeps the UI thread perfectly smooth.
-     */
+    private val IMAGE_SIZE = 224
+
     private suspend fun ensureInitialized() = withContext(Dispatchers.IO) {
         try {
             if (visionSession == null) {
+                // Ensure your OLD models are back in the assets folder!
                 val visionPath = getAssetFilePath("vision_model.onnx")
                 visionSession = env.createSession(visionPath)
-
-                // --- ADD THIS LOG ---
-                val inputInfo = visionSession!!.inputInfo
-                Log.d("AI_INDEXER", "VISION MODEL EXPECTS INPUT: $inputInfo")
+                Log.d("AI_INDEXER", "VISION MODEL LOADED SUCCESS!")
             }
             if (textSession == null) {
                 val textPath = getAssetFilePath("text_model.onnx")
                 textSession = env.createSession(textPath)
-                val inputInfo = textSession!!.inputInfo
-                Log.d("AI_INDEXER", "TEXT MODEL EXPECTS INPUT: $inputInfo")
+                Log.d("AI_INDEXER", "TEXT MODEL LOADED SUCCESS!")
             }
+
+            // --- REVERTED: Standard Flat JSON Vocab Parser ---
             if (vocab.isEmpty()) {
                 val vocabJsonString = context.assets.open("vocab.json").bufferedReader().use { it.readText() }
                 val jsonObject = JSONObject(vocabJsonString)
@@ -61,16 +58,14 @@ class SearchEngine @Inject constructor(
                     tempVocab[key] = jsonObject.getInt(key)
                 }
                 vocab = tempVocab
+                Log.d("AI_INDEXER", "VOCAB PARSED SUCCESS! Size: ${vocab.size}")
             }
         } catch (e: Exception) {
-            Log.e("AI_INDEXER", "FAILED TO INITIALIZE AI MODELS!", e)
+            Log.e("AI_INDEXER", "FAILED TO INITIALIZE MODELS!", e)
             throw e
         }
     }
 
-    /**
-     * Extracts an asset to the cache directory so ONNX can memory-map it directly from the SSD.
-     */
     private fun getAssetFilePath(assetName: String): String {
         val file = File(context.cacheDir, assetName)
         if (!file.exists()) {
@@ -90,19 +85,29 @@ class SearchEngine @Inject constructor(
         var inputStream: java.io.InputStream? = null
 
         return@withContext try {
-            inputStream = encryptedStorageManager.internalOpenEncryptedFileInput(photo.internalFileName)
+            val fileNameToLoad = if (photo.type.isVideo) {
+                photo.internalVideoPreviewFileName
+            } else {
+                photo.internalFileName
+            }
+
+            inputStream = encryptedStorageManager.internalOpenEncryptedFileInput(fileNameToLoad)
+
+            if (inputStream == null && photo.type.isVideo) {
+                inputStream = encryptedStorageManager.internalOpenEncryptedFileInput(photo.internalThumbnailFileName)
+            }
+
             if (inputStream == null) return@withContext null
 
-            // If it's a video file, BitmapFactory will naturally return null here,
-            // gracefully skipping the video without crashing.
             bitmap = BitmapFactory.decodeStream(inputStream)
             if (bitmap == null) return@withContext null
 
-            val tensor = preprocess(bitmap, env)
+            val tensor = preprocessForModel(bitmap, env)
 
             val inputName = visionSession!!.inputNames.iterator().next()
             val result = visionSession!!.run(mapOf(inputName to tensor))
 
+            // --- REVERTED: Standard 2D FloatArray Extraction ---
             @Suppress("UNCHECKED_CAST")
             val embeddingArray = result[0].value as Array<FloatArray>
             val vector = embeddingArray[0]
@@ -113,7 +118,7 @@ class SearchEngine @Inject constructor(
             floatArrayToByteArray(vector)
 
         } catch (e: Exception) {
-            Log.e("AI_INDEXER", "Exception thrown while processing ${photo.fileName}", e)
+            Log.e("AI_INDEXER", "Exception processing ${photo.fileName}", e)
             null
         } finally {
             inputStream?.close()
@@ -126,12 +131,13 @@ class SearchEngine @Inject constructor(
 
         return@withContext try {
             val tokens = tokenizeText(query)
-            val shape = longArrayOf(1, 77)
+            val shape = longArrayOf(1, 77) // Standard CLIP sequence length
             val tensor = OnnxTensor.createTensor(env, LongBuffer.wrap(tokens), shape)
 
             val inputName = textSession!!.inputNames.iterator().next()
             val result = textSession!!.run(mapOf(inputName to tensor))
 
+            // --- REVERTED: Standard 2D FloatArray Extraction ---
             @Suppress("UNCHECKED_CAST")
             val embeddingArray = result[0].value as Array<FloatArray>
             val vector = embeddingArray[0]
@@ -146,6 +152,71 @@ class SearchEngine @Inject constructor(
         }
     }
 
+    private fun preprocessForModel(bitmap: Bitmap, env: OrtEnvironment): OnnxTensor {
+        val dimension = Math.min(bitmap.width, bitmap.height)
+        val x = (bitmap.width - dimension) / 2
+        val y = (bitmap.height - dimension) / 2
+        val croppedBitmap = Bitmap.createBitmap(bitmap, x, y, dimension, dimension)
+
+        val resized = Bitmap.createScaledBitmap(croppedBitmap, IMAGE_SIZE, IMAGE_SIZE, true)
+
+        val floatArray = FloatArray(3 * IMAGE_SIZE * IMAGE_SIZE)
+        val pixels = IntArray(IMAGE_SIZE * IMAGE_SIZE)
+        resized.getPixels(pixels, 0, IMAGE_SIZE, 0, 0, IMAGE_SIZE, IMAGE_SIZE)
+
+        // Standard CLIP Normalization math
+        val normMeanR = 0.48145466f
+        val normMeanG = 0.4578275f
+        val normMeanB = 0.40821073f
+        val normStdR = 0.26862954f
+        val normStdG = 0.26130258f
+        val normStdB = 0.27577711f
+
+        val rOffset = 0
+        val gOffset = IMAGE_SIZE * IMAGE_SIZE
+        val bOffset = 2 * IMAGE_SIZE * IMAGE_SIZE
+
+        for (i in pixels.indices) {
+            val pixel = pixels[i]
+            val r = ((pixel shr 16 and 0xFF) / 255.0f - normMeanR) / normStdR
+            val g = ((pixel shr 8 and 0xFF) / 255.0f - normMeanG) / normStdG
+            val b = ((pixel and 0xFF) / 255.0f - normMeanB) / normStdB
+
+            floatArray[rOffset + i] = r
+            floatArray[gOffset + i] = g
+            floatArray[bOffset + i] = b
+        }
+
+        croppedBitmap.recycle()
+        resized.recycle()
+
+        val floatBuffer = FloatBuffer.wrap(floatArray)
+        val shape = longArrayOf(1, 3, IMAGE_SIZE.toLong(), IMAGE_SIZE.toLong())
+        return OnnxTensor.createTensor(env, floatBuffer, shape)
+    }
+
+    private fun tokenizeText(query: String): LongArray {
+        // Standard CLIP sequence length is 77
+        val tokens = LongArray(77) { 0L }
+        val words = query.lowercase().replace(Regex("[^a-z0-9 ]"), "").split(" ")
+
+        var tokenIndex = 0
+        tokens[tokenIndex++] = 49406L // Standard CLIP Start of Sequence token
+
+        for (word in words) {
+            if (word.isBlank() || tokenIndex >= 75) continue
+
+            val tokenId = vocab[word]
+            if (tokenId != null) {
+                tokens[tokenIndex] = tokenId.toLong()
+                tokenIndex++
+            }
+        }
+
+        tokens[tokenIndex] = 49407L // Standard CLIP End of Sequence token
+        return tokens
+    }
+
     fun cosineSimilarity(vectorA: FloatArray, vectorB: FloatArray): Float {
         var dotProduct = 0.0f
         var normA = 0.0f
@@ -156,75 +227,12 @@ class SearchEngine @Inject constructor(
             normB += vectorB[i] * vectorB[i]
         }
         return if (normA == 0.0f || normB == 0.0f) 0.0f
-        else (dotProduct / (Math.sqrt(normA.toDouble()) * Math.sqrt(normB.toDouble()))).toFloat()
-    }
-
-    private fun preprocess(bitmap: Bitmap, env: OrtEnvironment): OnnxTensor {
-        val dimension = Math.min(bitmap.width, bitmap.height)
-        val x = (bitmap.width - dimension) / 2
-        val y = (bitmap.height - dimension) / 2
-        val croppedBitmap = Bitmap.createBitmap(bitmap, x, y, dimension, dimension)
-
-        // --- THE FIX: Xenova explicitly needs 224x224 ---
-        val resized = Bitmap.createScaledBitmap(croppedBitmap, 224, 224, true)
-
-        val floatBuffer = FloatBuffer.allocate(3 * 224 * 224)
-        val pixels = IntArray(224 * 224)
-        resized.getPixels(pixels, 0, 224, 0, 0, 224, 224)
-
-        // Standard OpenAI CLIP Color Normalization
-        val normMeanRGB = floatArrayOf(0.48145466f, 0.4578275f, 0.40821073f)
-        val normStdRGB = floatArrayOf(0.26862954f, 0.26130258f, 0.27577711f)
-
-        val rOffset = 0
-        val gOffset = 224 * 224
-        val bOffset = 2 * 224 * 224
-
-        for (i in pixels.indices) {
-            val pixel = pixels[i]
-            val r = ((pixel shr 16 and 0xFF) / 255.0f - normMeanRGB[0]) / normStdRGB[0]
-            val g = ((pixel shr 8 and 0xFF) / 255.0f - normMeanRGB[1]) / normStdRGB[1]
-            val b = ((pixel and 0xFF) / 255.0f - normMeanRGB[2]) / normStdRGB[2]
-
-            floatBuffer.put(rOffset + i, r)
-            floatBuffer.put(gOffset + i, g)
-            floatBuffer.put(bOffset + i, b)
-        }
-
-        croppedBitmap.recycle()
-        resized.recycle()
-
-        // --- THE FIX: Tell the tensor it's 224x224 ---
-        val shape = longArrayOf(1, 3, 224, 224)
-        return OnnxTensor.createTensor(env, floatBuffer, shape)
-    }
-
-    private fun tokenizeText(query: String): LongArray {
-        val tokens = LongArray(77) { 0L }
-        tokens[0] = 49406L
-
-        val words = query.lowercase().replace(Regex("[^a-z0-9 ]"), "").split(" ")
-
-        var tokenIndex = 1
-        for (word in words) {
-            if (word.isBlank() || tokenIndex >= 76) continue
-
-            val clipWord = "$word</w>"
-            val tokenId = vocab[clipWord] ?: vocab[word]
-
-            if (tokenId != null) {
-                tokens[tokenIndex] = tokenId.toLong()
-                tokenIndex++
-            }
-        }
-
-        tokens[tokenIndex] = 49407L
-        return tokens
+        else (dotProduct / (sqrt(normA.toDouble()) * sqrt(normB.toDouble()))).toFloat()
     }
 
     private fun floatArrayToByteArray(floatArray: FloatArray): ByteArray {
         val byteBuffer = ByteBuffer.allocate(floatArray.size * 4)
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
+            .order(ByteOrder.LITTLE_ENDIAN)
         byteBuffer.asFloatBuffer().put(floatArray)
         return byteBuffer.array()
     }

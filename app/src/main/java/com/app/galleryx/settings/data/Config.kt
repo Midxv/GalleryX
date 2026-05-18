@@ -115,6 +115,29 @@ class Config(context: Context) {
         set(value) = putBoolean(GALLERY_HIDE_SEARCH_ICON, value)
 
     /**
+     * Determines if on-device AI semantic search and indexing is enabled.
+     */
+    var galleryAiSearchEnabled: Boolean
+        get() = getBoolean(GALLERY_AI_SEARCH_ENABLED, GALLERY_AI_SEARCH_ENABLED_DEFAULT)
+        set(value) = putBoolean(GALLERY_AI_SEARCH_ENABLED, value)
+
+    // --- NEW: Album Hide Feature Variables ---
+
+    /**
+     * Determines if hidden albums should be temporarily visible.
+     */
+    var galleryShowHiddenAlbums: Boolean
+        get() = getBoolean(GALLERY_SHOW_HIDDEN_ALBUMS, GALLERY_SHOW_HIDDEN_ALBUMS_DEFAULT)
+        set(value) = putBoolean(GALLERY_SHOW_HIDDEN_ALBUMS, value)
+
+    /**
+     * Stores the set of UUIDs for albums that have been hidden.
+     */
+    var galleryHiddenAlbums: Set<String>
+        get() = getStringSet(GALLERY_HIDDEN_ALBUMS, GALLERY_HIDDEN_ALBUMS_DEFAULT)
+        set(value) = putStringSet(GALLERY_HIDDEN_ALBUMS, value)
+
+    /**
      * Determines if screenshots should be allowed.
      */
     var securityAllowScreenshots: Boolean
@@ -190,6 +213,11 @@ class Config(context: Context) {
 
     fun getString(key: String, default: String?) = preferences.getString(key, default)
 
+    // --- NEW: Helper for StringSet ---
+    fun getStringSet(key: String, default: Set<String>): Set<String> {
+        return preferences.getStringSet(key, default) ?: default
+    }
+
     fun getInt(key: String, default: Int) = preferences.getInt(key, default)
 
     fun getIntFromString(key: String, default: Int): Int {
@@ -204,6 +232,13 @@ class Config(context: Context) {
     fun putString(key: String, value: String?) {
         preferences.edit {
             putString(key, value)
+        }
+    }
+
+    // --- NEW: Helper for StringSet ---
+    fun putStringSet(key: String, value: Set<String>) {
+        preferences.edit {
+            putStringSet(key, value)
         }
     }
 
@@ -256,6 +291,16 @@ class Config(context: Context) {
         const val GALLERY_HIDE_SEARCH_ICON = "gallery^hideSearchIcon"
         const val GALLERY_HIDE_SEARCH_ICON_DEFAULT = false
 
+        const val GALLERY_AI_SEARCH_ENABLED = "gallery^aiSearchEnabled"
+        const val GALLERY_AI_SEARCH_ENABLED_DEFAULT = true
+
+        // --- NEW: Keys for Album Hide Feature ---
+        const val GALLERY_SHOW_HIDDEN_ALBUMS = "gallery^showHiddenAlbums"
+        const val GALLERY_SHOW_HIDDEN_ALBUMS_DEFAULT = false
+
+        const val GALLERY_HIDDEN_ALBUMS = "gallery^hiddenAlbums"
+        val GALLERY_HIDDEN_ALBUMS_DEFAULT = emptySet<String>()
+
         const val SECURITY_ALLOW_SCREENSHOTS = "security^allowScreenshots"
         const val SECURITY_ALLOW_SCREENSHOTS_DEFAULT = false
 
@@ -271,7 +316,6 @@ class Config(context: Context) {
         const val SECURITY_UNINSTALL_PROTECTION = "security^uninstallProtection"
         const val SECURITY_UNINSTALL_PROTECTION_DEFAULT = false
 
-        // NEW: Key for the Disguise feature
         const val SECURITY_DISGUISE_APP = "security^disguiseApp"
         const val SECURITY_DISGUISE_APP_DEFAULT = false
 

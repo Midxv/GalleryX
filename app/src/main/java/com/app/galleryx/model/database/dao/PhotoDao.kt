@@ -47,7 +47,7 @@ interface PhotoDao {
     @Query("SELECT COUNT(*) FROM photo")
     suspend fun countAll(): Int
 
-    // --- NEW: Real-time AI Progress Trackers ---
+    // --- Real-time AI Progress Trackers ---
     @Query("SELECT COUNT(*) FROM photo")
     fun observeTotalCount(): Flow<Int>
 
@@ -56,11 +56,29 @@ interface PhotoDao {
 
     @Query("SELECT * FROM photo WHERE embedding IS NULL")
     suspend fun getUnindexedPhotos(): List<Photo>
-    // -------------------------------------------
 
     fun observeAllSorted(sort: Sort): Flow<List<Photo>> {
         val query = SimpleSQLiteQuery("SELECT * FROM photo ORDER BY ${sort.field.columnName} ${sort.order.sql}")
         return observeAll(query)
+    }
+
+    // --- NEW: Dynamic SQL to filter out hidden albums from All Photos ---
+    fun observeAllSortedAndFiltered(sort: Sort, hiddenUuids: Set<String>): Flow<List<Photo>> {
+        val queryStr = if (hiddenUuids.isEmpty()) {
+            "SELECT * FROM photo ORDER BY ${sort.field.columnName} ${sort.order.sql}"
+        } else {
+            // Wrap each UUID in single quotes for the SQL IN clause
+            val formattedUuids = hiddenUuids.joinToString(",") { "'$it'" }
+
+            """
+            SELECT * FROM photo 
+            WHERE photo_uuid NOT IN (
+                SELECT photo_uuid FROM album_photos_cross_ref WHERE album_uuid IN ($formattedUuids)
+            ) 
+            ORDER BY ${sort.field.columnName} ${sort.order.sql}
+            """.trimIndent()
+        }
+        return observeAll(SimpleSQLiteQuery(queryStr))
     }
 
     @RawQuery(observedEntities = [Photo::class])

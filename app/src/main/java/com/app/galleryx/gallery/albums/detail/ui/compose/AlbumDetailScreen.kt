@@ -71,7 +71,6 @@ fun AlbumDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // CHANGED: Restored exitUntilCollapsedScrollBehavior to match Settings Screen!
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     var showConfirmDeleteDialog by remember { mutableStateOf(false) }
@@ -81,19 +80,17 @@ fun AlbumDetailScreen(
 
     AppTheme {
         Scaffold(
-            // Nested scroll connection must be on the Scaffold so the LargeTopAppBar knows to collapse
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 var showMore by remember { mutableStateOf(false) }
 
-                // CHANGED: Restored LargeTopAppBar for consistent styling
                 LargeTopAppBar(
                     title = {
                         Text(
                             text = uiState.albumName,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            fontWeight = FontWeight.Bold // Added bold weight
+                            fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
@@ -168,6 +165,21 @@ fun AlbumDetailScreen(
                                     Icon(
                                         painter = painterResource(R.drawable.ic_edit),
                                         contentDescription = stringResource(R.string.common_rename),
+                                    )
+                                }
+                            )
+
+                            // --- NEW: Hide Album Button ---
+                            DropdownMenuItem(
+                                text = { Text("Hide Album") },
+                                onClick = {
+                                    showMore = false
+                                    viewModel.handleUiEvent(AlbumDetailUiEvent.HideAlbum)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_eye_closed), // Using the eye icon from Settings
+                                        contentDescription = "Hide Album"
                                     )
                                 }
                             )

@@ -47,7 +47,10 @@ import com.app.galleryx.settings.data.Config
 import com.app.galleryx.ui.theme.AppTheme
 import com.app.galleryx.uicomponnets.bindings.BindableActivity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
@@ -65,23 +68,19 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
     @Inject
     override lateinit var config: Config
 
-    // --- Injected AI Engine and Database ---
     @Inject
     lateinit var photoDao: PhotoDao
 
     @Inject
     lateinit var searchEngine: SearchEngine
 
-    var onOrientationChanged: (Int) -> Unit = {} // Init empty
+    var onOrientationChanged: (Int) -> Unit = {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Launch the high-speed foreground AI indexer
         lifecycleScope.launch {
-            // This ensures the AI ONLY runs when the app is actively on screen.
-            // Swiping home instantly pauses it. Opening the app instantly resumes it.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 runForegroundFastIndexing()
             }
@@ -89,55 +88,68 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
     }
 
     /**
-     * Pulls unindexed photos and processes them immediately using exactly 3 concurrent threads.
+     * Pulls unindexed photos and processes them using exactly 3 concurrent threads.
+     * Uses a continuous loop to catch items imported while the app is running.
      */
     private suspend fun runForegroundFastIndexing() = withContext(Dispatchers.IO) {
-        // Fetch all unindexed items from the database
-        val allUnindexed = photoDao.getUnindexedPhotos()
 
-        // STRICT FILTER: Since photo.type is likely an Int, we filter by filename extensions.
-        // This is 100% crash-proof and guarantees we only send valid media to the AI.
-        val validExtensions = listOf(".jpg", ".jpeg", ".png", ".webp", ".heic", ".mp4", ".mkv", ".gif")
+        // --- NEW: The Continuous Background Loop ---
+        while (isActive) {
 
-        val mediaToIndex = allUnindexed.filter { photo ->
-            // Convert to lowercase safely in case fileName is somehow null
-            val fileName = photo.fileName?.lowercase() ?: ""
-            validExtensions.any { ext -> fileName.endsWith(ext) }
-        }
+            // If the user disabled AI in settings, pause the loop entirely
+            if (!config.galleryAiSearchEnabled) {
+                delay(2000)
+                continue
+            }
 
-        Log.d("AI_INDEXER", "Found ${mediaToIndex.size} unindexed images/videos to process.")
+            // Fetch all unindexed items from the database
+            val allUnindexed = photoDao.getUnindexedPhotos()
 
-        if (mediaToIndex.isEmpty()) {
-            return@withContext // Everything valid is indexed!
-        }
+            val validExtensions = listOf(".jpg", ".jpeg", ".png", ".webp", ".heic", ".mp4", ".mkv", ".gif")
+            val mediaToIndex = allUnindexed.filter { photo ->
+                val fileName = photo.fileName?.lowercase() ?: ""
+                validExtensions.any { ext -> fileName.endsWith(ext) }
+            }
 
-        // Restrict inference to exactly 3 concurrent threads to prevent RAM spikes
-        val concurrencySemaphore = Semaphore(3)
+            // If there's nothing to do, sleep for 1.5 seconds and check again.
+            // This catches the "missing" photos during a batch import!
+            if (mediaToIndex.isEmpty()) {
+                delay(1500)
+                continue
+            }
 
-        mediaToIndex.forEach { mediaItem ->
-            // Check if the user minimized the app. If they did, stop looping immediately.
-            ensureActive()
+            Log.d("AI_INDEXER", "Found ${mediaToIndex.size} unindexed items. Starting batch...")
 
-            concurrencySemaphore.acquire()
-            launch {
-                try {
-                    Log.d("AI_INDEXER", "Attempting to index: ${mediaItem.fileName}")
+            val concurrencySemaphore = Semaphore(3)
 
-                    val embedding = searchEngine.indexPhoto(mediaItem)
+            // coroutineScope ensures this specific batch finishes before the loop restarts
+            coroutineScope {
+                mediaToIndex.forEach { mediaItem ->
+                    ensureActive()
 
-                    if (embedding != null) {
-                        mediaItem.embedding = embedding
-                        photoDao.insert(mediaItem) // Save mathematical vector to DB
-                        Log.d("AI_INDEXER", "SUCCESS: Indexed ${mediaItem.fileName}")
-                    } else {
-                        Log.e("AI_INDEXER", "FAILED: indexPhoto returned null for ${mediaItem.fileName}.")
+                    concurrencySemaphore.acquire()
+                    launch {
+                        try {
+                            val embedding = searchEngine.indexPhoto(mediaItem)
+
+                            if (embedding != null) {
+                                mediaItem.embedding = embedding
+                                photoDao.insert(mediaItem) // Save mathematical vector to DB
+                                Log.d("AI_INDEXER", "SUCCESS: Indexed ${mediaItem.fileName}")
+                            } else {
+                                Log.e("AI_INDEXER", "FAILED: indexPhoto returned null for ${mediaItem.fileName}.")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("AI_INDEXER", "CRASH during indexing ${mediaItem.fileName}", e)
+                        } finally {
+                            concurrencySemaphore.release()
+                        }
                     }
-                } catch (e: Exception) {
-                    Log.e("AI_INDEXER", "CRASH during indexing ${mediaItem.fileName}", e)
-                } finally {
-                    concurrencySemaphore.release()
                 }
             }
+
+            // Small buffer delay between batches to keep the UI thread buttery smooth
+            delay(500)
         }
     }
 
@@ -147,8 +159,6 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
 
         findNavController(R.id.mainNavHostFragment).let { navController ->
             navController.addOnDestinationChangedListener { _, destination, _ ->
-
-                // Logic to update status bar appearance
                 WindowCompat.getInsetsController(
                     window, window.decorView
                 ).isAppearanceLightStatusBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
@@ -206,8 +216,6 @@ class MainActivity : BindableActivity<ActivityMainBinding>(R.layout.activity_mai
                         onNavigationItemClicked = { fragmentId ->
                             val navController = findNavController(R.id.mainNavHostFragment)
                             if (navController.currentDestination?.id != fragmentId) {
-
-                                // Instant tab switching configuration
                                 val navOptions = NavOptions.Builder()
                                     .setLaunchSingleTop(true)
                                     .setRestoreState(true)
